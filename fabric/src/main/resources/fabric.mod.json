@@ -12,25 +12,23 @@
     "sources": "${mod_repository}"
   },
   "license": "${mod_license}",
-  "icon": "assets/template/icon.png",
+  "icon": "assets/necessities/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "com.daqem.template.fabric.TemplateCommonFabric"
+      "com.daqem.necessities.fabric.NecessitiesCommonFabric"
     ],
     "client": [
-      "com.daqem.template.fabric.TemplateClientFabric"
+      "com.daqem.necessities.fabric.NecessitiesClientFabric"
     ]
   },
   "mixins": [
-    "template.mixins.json",
-    "template-common.mixins.json"
+    "necessities-common.mixins.json"
   ],
   "depends": {
     "fabric": "*",
     "minecraft": ">=${minecraft_version}",
     "architectury": ">=${architectury_version}",
-    "supermartijn642configlib": "${config_library_version}",
-    "uilib": "${ui_library_version}"
+    "supermartijn642configlib": "${config_library_version}"
   }
 }

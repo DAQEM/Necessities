@@ -3,7 +3,7 @@ architectury {
 }
 
 loom {
-    accessWidenerPath = file("src/main/resources/template.accesswidener")
+    accessWidenerPath = file("src/main/resources/necessities.accesswidener")
 }
 
 dependencies {
@@ -14,5 +14,4 @@ dependencies {
     modApi "dev.architectury:architectury:${project.architectury_version}"
 
     compileOnlyApi "curse.maven:supermartijn642s-config-lib-438332:${project.config_library_file_fabric}"
-    modImplementation "curse.maven:ui-933200:${project.ui_library_file_fabric}-sources-${project.ui_library_file_fabric_sources}"
 }

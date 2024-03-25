@@ -1,8 +1,8 @@
-package com.daqem.template.fabric;
+package com.daqem.necessities.fabric;
 
 import net.fabricmc.api.ClientModInitializer;
 
-public class TemplateClientFabric implements ClientModInitializer {
+public class NecessitiesClientFabric implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {

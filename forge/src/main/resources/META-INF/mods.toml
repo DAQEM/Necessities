@@ -39,10 +39,3 @@ versionRange = "[${config_library_version},)"
 ordering = "AFTER"
 side = "BOTH"
 
-[[dependencies."${mod_id}"]]
-modId = "uilib"
-mandatory = true
-versionRange = "[${ui_library_version},)"
-ordering = "AFTER"
-side = "CLIENT"
-

@@ -1,0 +1,14 @@
+{
+  "necessities.prefix.left_bracket": "[",
+  "necessities.prefix.name": "Necessities",
+  "necessities.prefix.right_bracket": "]",
+  "necessities.prefix.space": " ",
+  "necessities.commands.error.needs_player": "You need to be a player to use this command.",
+  "necessities.commands.weather.set.sun": "The weather is now sunny.",
+  "necessities.commands.weather.set.rain": "The weather is now rainy.",
+  "necessities.commands.weather.set.thunder": "The weather is now thundering.",
+  "necessities.commands.time.set.day": "The time is now day.",
+  "necessities.commands.time.set.noon": "The time is now noon.",
+  "necessities.commands.time.set.night": "The time is now night.",
+  "necessities.commands.time.set.midnight": "The time is now midnight."
+}
