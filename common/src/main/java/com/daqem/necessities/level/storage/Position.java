@@ -1,6 +1,8 @@
 package com.daqem.necessities.level.storage;
 
-public class SpawnPosition {
+public class Position {
+
+    public static final Position ZERO = new Position(0, 0, 0, 0, 0);
 
     public double x;
     public double y;
@@ -8,7 +10,7 @@ public class SpawnPosition {
     public float yaw;
     public float pitch;
 
-    public SpawnPosition(double x, double y, double z, float yaw, float pitch) {
+    public Position(double x, double y, double z, float yaw, float pitch) {
         this.x = x;
         this.y = y;
         this.z = z;

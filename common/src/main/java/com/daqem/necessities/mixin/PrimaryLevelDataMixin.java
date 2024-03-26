@@ -1,7 +1,8 @@
 package com.daqem.necessities.mixin;
 
 import com.daqem.necessities.level.storage.NecessitiesLevelData;
-import com.daqem.necessities.level.storage.SpawnPosition;
+import com.daqem.necessities.level.storage.Position;
+import com.daqem.necessities.level.storage.Warp;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
@@ -14,28 +15,48 @@ import net.minecraft.world.level.storage.LevelVersion;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Mixin(PrimaryLevelData.class)
 public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldData, NecessitiesLevelData {
 
-    @Unique private static SpawnPosition necessities$spawnPosition;
+    @Unique
+    private static Position necessities$spawnPosition = Position.ZERO;
+
+    @Unique
+    private static final List<Warp> necessities$Warps = new ArrayList<>();
 
     @Override
-    public SpawnPosition necessities$getSpawnPosition() {
+    public Position necessities$getSpawnPosition() {
         return necessities$spawnPosition;
     }
 
     @Override
-    public void necessities$setSpawnPosition(SpawnPosition spawnPosition) {
-        necessities$spawnPosition = spawnPosition;
+    public void necessities$setSpawnPosition(Position position) {
+        necessities$spawnPosition = position;
+    }
+
+    @Override
+    public List<Warp> necessities$getWarps() {
+        return necessities$Warps;
+    }
+
+    @Override
+    public void necessities$addWarp(Warp warp) {
+        necessities$Warps.add(warp);
+    }
+
+    @Override
+    public Warp necessities$getWarp(String name) {
+        return necessities$Warps.stream().filter(warp -> warp.name.equals(name)).findFirst().orElse(null);
     }
 
     @Inject(method = "parse", at = @At("HEAD"))
@@ -43,12 +64,12 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         OptionalDynamic<T> necessitiesTag = dynamic.get("Necessities");
 
         double spawnX = necessitiesTag.get("SpawnX").asDouble(0);
-        double spawnY = necessitiesTag.get("SpawnY").asDouble(64);
+        double spawnY = necessitiesTag.get("SpawnY").asDouble(0);
         double spawnZ = necessitiesTag.get("SpawnZ").asDouble(0);
         float spawnYaw = necessitiesTag.get("SpawnYaw").asFloat(0);
         float spawnPitch = necessitiesTag.get("SpawnPitch").asFloat(0);
 
-        necessities$spawnPosition = new SpawnPosition(spawnX, spawnY, spawnZ, spawnYaw, spawnPitch);
+        necessities$spawnPosition = new Position(spawnX, spawnY, spawnZ, spawnYaw, spawnPitch);
     }
 
     @Inject(method = "setTagData", at = @At("HEAD"))

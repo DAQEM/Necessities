@@ -6,8 +6,10 @@
   "client": [
   ],
   "mixins": [
+    "CommandSourceStackMixin",
     "PrimaryLevelDataMixin",
-    "ServerLevelMixin"
+    "ServerLevelMixin",
+    "ServerPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

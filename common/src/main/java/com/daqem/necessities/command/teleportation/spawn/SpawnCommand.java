@@ -1,8 +1,9 @@
 package com.daqem.necessities.command.teleportation.spawn;
 
+import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.level.NecessitiesServerLevel;
-import com.daqem.necessities.level.storage.SpawnPosition;
+import com.daqem.necessities.level.storage.Position;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -18,8 +19,9 @@ public class SpawnCommand implements Command {
                     if (context.getSource().getPlayer() != null) {
                         ServerPlayer player = context.getSource().getPlayer();
                         if (player.level() instanceof NecessitiesServerLevel serverLevel) {
-                            SpawnPosition spawnPos = serverLevel.necessities$getLevelData().necessities$getSpawnPosition();
+                            Position spawnPos = serverLevel.necessities$getLevelData().necessities$getSpawnPosition();
                             player.teleportTo((ServerLevel) serverLevel, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.yaw, spawnPos.pitch);
+                            context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.spawn"), true);
                             return 1;
                         }
                     } else {

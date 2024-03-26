@@ -10,5 +10,8 @@
   "necessities.commands.time.set.day": "The time is now day.",
   "necessities.commands.time.set.noon": "The time is now noon.",
   "necessities.commands.time.set.night": "The time is now night.",
-  "necessities.commands.time.set.midnight": "The time is now midnight."
+  "necessities.commands.time.set.midnight": "The time is now midnight.",
+  "necessities.commands.spawn": "Teleported to spawn.",
+  "necessities.commands.spawn.set": "Set spawn to your current location.",
+  "necessities.commands.warp.set": "Set warp {0} to your current location."
 }

@@ -2,6 +2,8 @@ package com.daqem.necessities.event;
 
 import com.daqem.necessities.command.teleportation.spawn.SetSpawnCommand;
 import com.daqem.necessities.command.teleportation.spawn.SpawnCommand;
+import com.daqem.necessities.command.teleportation.warp.SetWarpCommand;
+import com.daqem.necessities.command.teleportation.warp.WarpCommand;
 import com.daqem.necessities.command.time.DayCommand;
 import com.daqem.necessities.command.time.MidnightCommand;
 import com.daqem.necessities.command.time.NightCommand;
@@ -27,8 +29,13 @@ public class RegisterCommandsEvent {
             NightCommand.register(dispatcher);
             MidnightCommand.register(dispatcher);
 
+            // Spawn commands
             SpawnCommand.register(dispatcher);
             SetSpawnCommand.register(dispatcher);
+
+            // Warp commands
+            WarpCommand.register(dispatcher);
+            SetWarpCommand.register(dispatcher);
         });
     }
 }

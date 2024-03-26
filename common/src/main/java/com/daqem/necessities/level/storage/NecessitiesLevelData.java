@@ -1,10 +1,18 @@
 package com.daqem.necessities.level.storage;
 
-import net.minecraft.world.phys.Vec3;
+import java.util.List;
 
 public interface NecessitiesLevelData {
 
-    SpawnPosition necessities$getSpawnPosition();
+    Position necessities$getSpawnPosition();
 
-    void necessities$setSpawnPosition(SpawnPosition spawnPosition);
+    void necessities$setSpawnPosition(Position position);
+
+    List<Warp> necessities$getWarps();
+
+    Warp necessities$getWarp(String name);
+
+    void necessities$addWarp(Warp warp);
+
+
 }
