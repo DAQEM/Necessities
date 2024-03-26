@@ -9,6 +9,7 @@ import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.OptionalDynamic;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.storage.LevelVersion;
@@ -24,6 +25,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Mixin(PrimaryLevelData.class)
 public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldData, NecessitiesLevelData {
@@ -32,7 +35,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     private static Position necessities$spawnPosition = Position.ZERO;
 
     @Unique
-    private static final List<Warp> necessities$Warps = new ArrayList<>();
+    private static List<Warp> necessities$Warps = new ArrayList<>();
 
     @Override
     public Position necessities$getSpawnPosition() {
@@ -55,32 +58,40 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     }
 
     @Override
-    public Warp necessities$getWarp(String name) {
-        return necessities$Warps.stream().filter(warp -> warp.name.equals(name)).findFirst().orElse(null);
+    public Optional<Warp> necessities$getWarp(String name) {
+        return necessities$Warps.stream().filter(warp -> warp.name.equals(name)).findFirst();
     }
 
     @Inject(method = "parse", at = @At("HEAD"))
     private static <T> void parse(Dynamic<T> dynamic, DataFixer dataFixer, int i, CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion, PrimaryLevelData.SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle, CallbackInfoReturnable<PrimaryLevelData> cir) {
-        OptionalDynamic<T> necessitiesTag = dynamic.get("Necessities");
+        OptionalDynamic<T> necessities = dynamic.get("Necessities");
 
-        double spawnX = necessitiesTag.get("SpawnX").asDouble(0);
-        double spawnY = necessitiesTag.get("SpawnY").asDouble(0);
-        double spawnZ = necessitiesTag.get("SpawnZ").asDouble(0);
-        float spawnYaw = necessitiesTag.get("SpawnYaw").asFloat(0);
-        float spawnPitch = necessitiesTag.get("SpawnPitch").asFloat(0);
+        necessities$spawnPosition = Position.deserialize(necessities.get("Spawn").orElseEmptyMap());
+        necessities$Warps = necessities.get("Warps").asStream().map(dynamic1 -> {
+            String name = dynamic1.get("Name").asString("");
+            Position position = Position.deserialize(dynamic1.get("Position").orElseEmptyMap());
+            return new Warp(name, position);
+        }).collect(Collectors.toList());
 
-        necessities$spawnPosition = new Position(spawnX, spawnY, spawnZ, spawnYaw, spawnPitch);
     }
 
     @Inject(method = "setTagData", at = @At("HEAD"))
     private void setTagData(RegistryAccess registryAccess, CompoundTag compoundTag, CompoundTag compoundTag2, CallbackInfo ci) {
         CompoundTag necessitiesTag = new CompoundTag();
+        CompoundTag spawnTag = new CompoundTag();
+        necessities$spawnPosition.serialize(spawnTag);
+        necessitiesTag.put("Spawn", spawnTag);
 
-        necessitiesTag.putDouble("SpawnX", necessities$spawnPosition.x);
-        necessitiesTag.putDouble("SpawnY", necessities$spawnPosition.y);
-        necessitiesTag.putDouble("SpawnZ", necessities$spawnPosition.z);
-        necessitiesTag.putFloat("SpawnYaw", necessities$spawnPosition.yaw);
-        necessitiesTag.putFloat("SpawnPitch", necessities$spawnPosition.pitch);
+        ListTag warpsTag = new ListTag();
+        necessities$Warps.forEach(warp -> {
+            CompoundTag warpTag = new CompoundTag();
+            warpTag.putString("Name", warp.name);
+            CompoundTag positionTag = new CompoundTag();
+            warp.position.serialize(positionTag);
+            warpTag.put("Position", positionTag);
+            warpsTag.add(warpTag);
+        });
+        necessitiesTag.put("Warps", warpsTag);
 
         compoundTag.put("Necessities", necessitiesTag);
     }

@@ -1,6 +1,7 @@
 package com.daqem.necessities.level.storage;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface NecessitiesLevelData {
 
@@ -10,7 +11,7 @@ public interface NecessitiesLevelData {
 
     List<Warp> necessities$getWarps();
 
-    Warp necessities$getWarp(String name);
+    Optional<Warp> necessities$getWarp(String name);
 
     void necessities$addWarp(Warp warp);
 

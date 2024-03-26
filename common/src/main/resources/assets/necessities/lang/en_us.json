@@ -13,5 +13,7 @@
   "necessities.commands.time.set.midnight": "The time is now midnight.",
   "necessities.commands.spawn": "Teleported to spawn.",
   "necessities.commands.spawn.set": "Set spawn to your current location.",
-  "necessities.commands.warp.set": "Set warp {0} to your current location."
+  "necessities.commands.warp.set": "Set warp %s to your current location.",
+  "necessities.commands.warp": "Teleported to warp %s.",
+  "necessities.commands.warp.not_found": "Warp %s not found."
 }

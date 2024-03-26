@@ -23,7 +23,7 @@ public class SetWarpCommand implements Command {
                                 Warp warp = new Warp(name, source.necessities$getPosition());
                                 NecessitiesServerLevel level = source.necessities$getLevel();
                                 level.necessities$getLevelData().necessities$addWarp(warp);
-                                context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.warp.set", name), true);
+                                context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.warp.set", Necessities.colored(name)), true);
                                 return 1;
                             }
                             return 0;
