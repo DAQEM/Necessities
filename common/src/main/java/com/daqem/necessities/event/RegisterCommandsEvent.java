@@ -1,9 +1,9 @@
 package com.daqem.necessities.event;
 
-import com.daqem.necessities.command.teleportation.spawn.SetSpawnCommand;
-import com.daqem.necessities.command.teleportation.spawn.SpawnCommand;
-import com.daqem.necessities.command.teleportation.warp.SetWarpCommand;
-import com.daqem.necessities.command.teleportation.warp.WarpCommand;
+import com.daqem.necessities.command.teleportation.level.spawn.SetSpawnCommand;
+import com.daqem.necessities.command.teleportation.level.spawn.SpawnCommand;
+import com.daqem.necessities.command.teleportation.level.warp.SetWarpCommand;
+import com.daqem.necessities.command.teleportation.level.warp.WarpCommand;
 import com.daqem.necessities.command.time.DayCommand;
 import com.daqem.necessities.command.time.MidnightCommand;
 import com.daqem.necessities.command.time.NightCommand;

@@ -1,12 +1,15 @@
 package com.daqem.necessities.command;
 
 import com.daqem.necessities.level.NecessitiesServerLevel;
-import com.daqem.necessities.level.NecessitiesServerPlayer;
-import com.daqem.necessities.level.storage.Position;
-import net.minecraft.server.level.ServerLevel;
+import com.daqem.necessities.level.storage.NecessitiesLevelData;
+import com.daqem.necessities.model.Position;
 
 public interface NecessitiesCommandSourceStack {
 
     NecessitiesServerLevel necessities$getLevel();
     Position necessities$getPosition();
+
+    NecessitiesLevelData necessities$getLevelData();
+
+    NecessitiesServerLevel necessities$getOverworld();
 }

@@ -3,7 +3,8 @@ package com.daqem.necessities.mixin;
 import com.daqem.necessities.command.NecessitiesCommandSourceStack;
 import com.daqem.necessities.level.NecessitiesServerLevel;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
-import com.daqem.necessities.level.storage.Position;
+import com.daqem.necessities.level.storage.NecessitiesLevelData;
+import com.daqem.necessities.model.Position;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerLevel;
@@ -36,6 +37,16 @@ public abstract class CommandSourceStackMixin implements SharedSuggestionProvide
             return serverPlayer.necessities$getPosition();
         }
         Vec3 vec3 = getPosition();
-        return new Position(vec3.x, vec3.y, vec3.z, 0, 0);
+        return new Position(vec3.x, vec3.y, vec3.z, 0, 0, necessities$getLevel().necessities$getDimension());
+    }
+
+    @Override
+    public NecessitiesLevelData necessities$getLevelData() {
+        return necessities$getOverworld().necessities$getLevelData();
+    }
+
+    @Override
+    public NecessitiesServerLevel necessities$getOverworld() {
+        return (NecessitiesServerLevel) getLevel().getServer().getLevel(ServerLevel.OVERWORLD);
     }
 }

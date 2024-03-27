@@ -1,5 +1,6 @@
 package com.daqem.necessities.command.weather;
 
+import com.daqem.necessities.config.NecessitiesConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -11,6 +12,6 @@ public class SunCommand extends WeatherCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(TYPE)
                 .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
-                .executes(context -> setWeather(context.getSource(), TYPE, 6000, 0, false, false)));
+                .executes(context -> setWeather(context.getSource(), TYPE, NecessitiesConfig.sunnyTime.get(), 0, false, false)));
     }
 }

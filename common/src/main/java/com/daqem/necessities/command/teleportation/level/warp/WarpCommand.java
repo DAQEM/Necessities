@@ -1,4 +1,4 @@
-package com.daqem.necessities.command.teleportation.warp;
+package com.daqem.necessities.command.teleportation.level.warp;
 
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
@@ -20,14 +20,14 @@ public class WarpCommand implements Command {
                 .then(Commands.argument("warp", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
-                                return SharedSuggestionProvider.suggest(serverPlayer.necessities$getLevel().necessities$getLevelData().necessities$getWarps().stream().map(warp -> warp.name), builder);
+                                return SharedSuggestionProvider.suggest(serverPlayer.necessities$getLevelData().necessities$getWarps().stream().map(warp -> warp.name), builder);
                             }
                             return SharedSuggestionProvider.suggest(new ArrayList<>(), builder);
                         })
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                                 String warpName = StringArgumentType.getString(context, "warp");
-                                serverPlayer.necessities$getLevel().necessities$getLevelData().necessities$getWarp(warpName).ifPresentOrElse(warp -> {
+                                serverPlayer.necessities$getLevelData().necessities$getWarp(warpName).ifPresentOrElse(warp -> {
                                     serverPlayer.necessities$teleport(warp.position);
                                     context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.warp", Necessities.colored(warp.name)), true);
                                 }, () -> {

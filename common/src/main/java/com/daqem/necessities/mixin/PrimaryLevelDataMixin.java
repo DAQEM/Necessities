@@ -1,8 +1,8 @@
 package com.daqem.necessities.mixin;
 
 import com.daqem.necessities.level.storage.NecessitiesLevelData;
-import com.daqem.necessities.level.storage.Position;
-import com.daqem.necessities.level.storage.Warp;
+import com.daqem.necessities.model.Position;
+import com.daqem.necessities.model.Warp;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
@@ -23,19 +23,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Mixin(PrimaryLevelData.class)
 public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldData, NecessitiesLevelData {
 
     @Unique
-    private static Position necessities$spawnPosition = Position.ZERO;
+    private Position necessities$spawnPosition = Position.ZERO;
 
     @Unique
-    private static List<Warp> necessities$Warps = new ArrayList<>();
+    private Map<String, Warp> necessities$Warps = new HashMap<>();
 
     @Override
     public Position necessities$getSpawnPosition() {
@@ -49,49 +47,52 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
 
     @Override
     public List<Warp> necessities$getWarps() {
-        return necessities$Warps;
+        return new ArrayList<>(necessities$Warps.values());
+    }
+
+    @Override
+    public void necessities$setWarps(List<Warp> warps) {
+        necessities$Warps = warps.stream().collect(Collectors.toMap(warp -> warp.name, warp -> warp));
     }
 
     @Override
     public void necessities$addWarp(Warp warp) {
-        necessities$Warps.add(warp);
+        necessities$Warps.put(warp.name, warp);
     }
 
     @Override
     public Optional<Warp> necessities$getWarp(String name) {
-        return necessities$Warps.stream().filter(warp -> warp.name.equals(name)).findFirst();
+        return necessities$Warps.containsKey(name) ? Optional.of(necessities$Warps.get(name)) : Optional.empty();
     }
 
-    @Inject(method = "parse", at = @At("HEAD"))
-    private static <T> void parse(Dynamic<T> dynamic, DataFixer dataFixer, int i, CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion, PrimaryLevelData.SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle, CallbackInfoReturnable<PrimaryLevelData> cir) {
+    // Only fired when creating a new world.
+    @Inject(method = "<init>(Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/levelgen/WorldOptions;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lcom/mojang/serialization/Lifecycle;)V", at = @At("RETURN"))
+    private void init(CallbackInfo ci) {
+        necessities$spawnPosition = Position.ZERO;
+        necessities$Warps = new HashMap<>();
+    }
+
+    @Inject(method = "parse", at = @At("RETURN"))
+    private static <T> void parse(Dynamic<T> dynamic, DataFixer dataFixer, int i, CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion, @SuppressWarnings("deprecation") PrimaryLevelData.SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle, CallbackInfoReturnable<PrimaryLevelData> cir) {
         OptionalDynamic<T> necessities = dynamic.get("Necessities");
 
-        necessities$spawnPosition = Position.deserialize(necessities.get("Spawn").orElseEmptyMap());
-        necessities$Warps = necessities.get("Warps").asStream().map(dynamic1 -> {
-            String name = dynamic1.get("Name").asString("");
-            Position position = Position.deserialize(dynamic1.get("Position").orElseEmptyMap());
-            return new Warp(name, position);
-        }).collect(Collectors.toList());
+        Position necessities$spawnPosition = Position.deserialize(necessities.get("Spawn").orElseEmptyMap());
+        List<Warp> necessities$Warps = necessities.get("Warps").asStream().map(Warp::deserialize)
+                .collect(Collectors.toList());
 
+        if (cir.getReturnValue() instanceof NecessitiesLevelData data) {
+            data.necessities$setSpawnPosition(necessities$spawnPosition);
+            data.necessities$setWarps(necessities$Warps);
+        }
     }
 
     @Inject(method = "setTagData", at = @At("HEAD"))
     private void setTagData(RegistryAccess registryAccess, CompoundTag compoundTag, CompoundTag compoundTag2, CallbackInfo ci) {
         CompoundTag necessitiesTag = new CompoundTag();
-        CompoundTag spawnTag = new CompoundTag();
-        necessities$spawnPosition.serialize(spawnTag);
-        necessitiesTag.put("Spawn", spawnTag);
 
-        ListTag warpsTag = new ListTag();
-        necessities$Warps.forEach(warp -> {
-            CompoundTag warpTag = new CompoundTag();
-            warpTag.putString("Name", warp.name);
-            CompoundTag positionTag = new CompoundTag();
-            warp.position.serialize(positionTag);
-            warpTag.put("Position", positionTag);
-            warpsTag.add(warpTag);
-        });
-        necessitiesTag.put("Warps", warpsTag);
+        necessitiesTag.put("Spawn", necessities$spawnPosition.serialize());
+        necessitiesTag.put("Warps", necessities$Warps.values().stream().map(Warp::serialize)
+                .collect(Collectors.toCollection(ListTag::new)));
 
         compoundTag.put("Necessities", necessitiesTag);
     }
