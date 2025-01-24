@@ -2,7 +2,7 @@ package com.daqem.necessities.command.teleportation.level.warp;
 
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
-import com.daqem.necessities.level.NecessitiesServerLevel;
+import com.daqem.necessities.command.NecessitiesCommandSourceStack;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -12,10 +12,11 @@ import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.ArrayList;
 
-public class WarpCommand implements Command {
+public class DeleteWarpCommand implements Command {
 
+    @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("warp")
+        dispatcher.register(Commands.literal("delwarp")
                 .then(Commands.argument("warp", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
@@ -24,17 +25,16 @@ public class WarpCommand implements Command {
                             return SharedSuggestionProvider.suggest(new ArrayList<>(), builder);
                         })
                         .executes(context -> {
-                            if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
+                            if (context.getSource() instanceof NecessitiesCommandSourceStack source) {
                                 String warpName = StringArgumentType.getString(context, "warp");
-                                serverPlayer.necessities$getLevelData().necessities$getWarp(warpName).ifPresentOrElse(warp -> {
-                                    serverPlayer.necessities$teleport(warp.position);
-                                    context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.warp", Necessities.colored(warp.name)), true);
+                                source.necessities$getLevelData().necessities$getWarp(warpName).ifPresentOrElse(warp -> {
+                                    source.necessities$getLevelData().necessities$removeWarp(warp.name);
+                                    context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.warp.delete", Necessities.colored(warp.name)), true);
                                 }, () -> {
                                     context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.warp.not_found", Necessities.coloredFailure(warpName)));
                                 });
                                 return 1;
                             }
-                            context.getSource().sendFailure(NEEDS_PLAYER_ERROR);
                             return 0;
                         })));
     }

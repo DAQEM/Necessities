@@ -20,5 +20,7 @@ public interface NecessitiesLevelData {
 
     void necessities$addWarp(Warp warp);
 
+    void necessities$removeWarp(String name);
+
 
 }

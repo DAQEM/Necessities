@@ -13,9 +13,9 @@ public class Home {
         this.position = position;
     }
 
-    public static Home deserialize(Dynamic<?> dynamic) {
-        String name = dynamic.get("Name").asString("");
-        Position position = Position.deserialize(dynamic.get("Position").orElseEmptyMap());
+    public static Home deserialize(CompoundTag tag) {
+        String name = tag.getString("Name");
+        Position position = Position.deserialize(tag.getCompound("Position"));
         return new Home(name, position);
     }
 

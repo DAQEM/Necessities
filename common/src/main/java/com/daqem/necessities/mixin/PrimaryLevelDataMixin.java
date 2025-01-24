@@ -61,6 +61,11 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     }
 
     @Override
+    public void necessities$removeWarp(String name) {
+        necessities$Warps.remove(name);
+    }
+
+    @Override
     public Optional<Warp> necessities$getWarp(String name) {
         return necessities$Warps.containsKey(name) ? Optional.of(necessities$Warps.get(name)) : Optional.empty();
     }

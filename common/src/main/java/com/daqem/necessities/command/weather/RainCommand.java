@@ -9,7 +9,7 @@ public class RainCommand extends WeatherCommand {
 
     private static final String TYPE = "rain";
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(TYPE)
                 .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
                 .executes(context -> setWeather(context.getSource(), TYPE, 0, NecessitiesConfig.rainyTime.get(), true, false)));

@@ -1,8 +1,7 @@
-package com.daqem.necessities.command.teleportation.level.warp;
+package com.daqem.necessities.command.teleportation.player.home;
 
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
-import com.daqem.necessities.level.NecessitiesServerLevel;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -12,25 +11,26 @@ import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.ArrayList;
 
-public class WarpCommand implements Command {
+public class DeleteHomeCommand implements Command {
 
+    @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("warp")
-                .then(Commands.argument("warp", StringArgumentType.string())
+        dispatcher.register(Commands.literal("delhome")
+                .then(Commands.argument("home", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
-                                return SharedSuggestionProvider.suggest(serverPlayer.necessities$getLevelData().necessities$getWarps().stream().map(warp -> warp.name), builder);
+                                return SharedSuggestionProvider.suggest(serverPlayer.necessities$getHomes().stream().map(home -> home.name), builder);
                             }
                             return SharedSuggestionProvider.suggest(new ArrayList<>(), builder);
                         })
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
-                                String warpName = StringArgumentType.getString(context, "warp");
-                                serverPlayer.necessities$getLevelData().necessities$getWarp(warpName).ifPresentOrElse(warp -> {
-                                    serverPlayer.necessities$teleport(warp.position);
-                                    context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.warp", Necessities.colored(warp.name)), true);
+                                String homeName = StringArgumentType.getString(context, "home");
+                                serverPlayer.necessities$getHome(homeName).ifPresentOrElse(home -> {
+                                    serverPlayer.necessities$removeHome(home.name);
+                                    context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.home.delete", Necessities.colored(home.name)), true);
                                 }, () -> {
-                                    context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.warp.not_found", Necessities.coloredFailure(warpName)));
+                                    context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.not_found", Necessities.coloredFailure(homeName)));
                                 });
                                 return 1;
                             }

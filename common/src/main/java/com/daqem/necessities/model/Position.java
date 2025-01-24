@@ -34,6 +34,16 @@ public class Position {
         return new Position(x, y, z, yaw, pitch, dimension);
     }
 
+    public static Position deserialize(CompoundTag tag) {
+        double x = tag.getDouble("X");
+        double y = tag.getDouble("Y");
+        double z = tag.getDouble("Z");
+        float yaw = tag.getFloat("Yaw");
+        float pitch = tag.getFloat("Pitch");
+        ResourceLocation dimension = new ResourceLocation(tag.getString("Dimension"));
+        return new Position(x, y, z, yaw, pitch, dimension);
+    }
+
     public CompoundTag serialize() {
         CompoundTag tag = new CompoundTag();
         tag.putDouble("X", x);

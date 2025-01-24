@@ -15,5 +15,11 @@
   "necessities.commands.spawn.set": "Set spawn to your current location.",
   "necessities.commands.warp.set": "Set warp %s to your current location.",
   "necessities.commands.warp": "Teleported to warp %s.",
-  "necessities.commands.warp.not_found": "Warp %s not found."
+  "necessities.commands.warp.not_found": "Warp %s not found.",
+  "necessities.commands.warp.delete": "Warp %s has been deleted.",
+  "necessities.commands.home.set": "Set home %s to your current location.",
+  "necessities.commands.home": "Teleported to home %s.",
+  "necessities.commands.home.not_found": "Home %s not found.",
+  "necessities.commands.home.delete": "Home %s has been deleted.",
+  "necessities.commands.home.limit": "You have reached the maximum amount of homes."
 }

@@ -13,7 +13,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class SetSpawnCommand implements Command {
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("setspawn")
             .requires(source -> source.hasPermission(2))
             .executes(context -> {

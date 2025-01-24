@@ -10,9 +10,8 @@ import net.minecraft.commands.Commands;
 
 public class SpawnCommand implements Command {
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("spawn")
-                .requires(source -> source.hasPermission(2))
                 .executes(context -> {
                     if (context.getSource().getPlayer() != null) {
                         if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
