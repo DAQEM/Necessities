@@ -9,6 +9,6 @@ pluginManagement {
 
 include("common")
 include("fabric")
-include("forge")
+include("neoforge")
 
-rootProject.name = "necessities"
+rootProject.name = "Necessities 1.21"

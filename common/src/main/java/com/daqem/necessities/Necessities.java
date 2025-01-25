@@ -94,4 +94,12 @@ public class Necessities {
     public static MutableComponent coloredFailure(MutableComponent component) {
         return component.withStyle(style -> style.withColor(0xFFFFFF));
     }
+
+    public static MutableComponent literal(String str) {
+        return Component.literal(str);
+    }
+
+    public static MutableComponent coloredLiteral(String str) {
+        return Component.literal(str).withStyle(style -> style.withColor(NecessitiesConfig.primaryColor.get()));
+    }
 }

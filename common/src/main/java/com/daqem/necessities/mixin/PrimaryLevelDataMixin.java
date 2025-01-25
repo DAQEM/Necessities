@@ -78,7 +78,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     }
 
     @Inject(method = "parse", at = @At("RETURN"))
-    private static <T> void parse(Dynamic<T> dynamic, DataFixer dataFixer, int i, CompoundTag compoundTag, LevelSettings levelSettings, LevelVersion levelVersion, @SuppressWarnings("deprecation") PrimaryLevelData.SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle, CallbackInfoReturnable<PrimaryLevelData> cir) {
+    private static <T> void parse(Dynamic<T> dynamic, LevelSettings levelSettings, PrimaryLevelData.SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle, CallbackInfoReturnable<PrimaryLevelData> cir) {
         OptionalDynamic<T> necessities = dynamic.get("Necessities");
 
         Position necessities$spawnPosition = Position.deserialize(necessities.get("Spawn").orElseEmptyMap());

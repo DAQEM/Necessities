@@ -35,6 +35,23 @@ public class HomeCommand implements Command {
                             }
                             context.getSource().sendFailure(NEEDS_PLAYER_ERROR);
                             return 0;
-                        })));
+                        }))
+                .executes(context -> {
+                    if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
+                        if (serverPlayer.necessities$getHomes().isEmpty()) {
+                            context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.no_homes"));
+                            return 0;
+                        } else if (serverPlayer.necessities$getHomes().size() == 1) {
+                            serverPlayer.necessities$teleport(serverPlayer.necessities$getHomes().getFirst().position);
+                            context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.home", Necessities.colored(serverPlayer.necessities$getHomes().get(0).name)), true);
+                            return 1;
+                        } else {
+                            context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
+                            return 0;
+                        }
+                    }
+                    context.getSource().sendFailure(NEEDS_PLAYER_ERROR);
+                    return 0;
+                }));
     }
 }

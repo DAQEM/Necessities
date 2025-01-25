@@ -1,6 +1,5 @@
 package com.daqem.necessities.model;
 
-import com.mojang.serialization.Dynamic;
 import net.minecraft.nbt.CompoundTag;
 
 public class Home {
