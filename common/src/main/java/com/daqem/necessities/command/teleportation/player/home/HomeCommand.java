@@ -27,9 +27,9 @@ public class HomeCommand implements Command {
                                 String homeName = StringArgumentType.getString(context, "home");
                                 serverPlayer.necessities$getHome(homeName).ifPresentOrElse(home -> {
                                     serverPlayer.necessities$teleport(home.position);
-                                    context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.home", Necessities.colored(home.name)), true);
+                                    serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home", Necessities.colored(home.name)), false);
                                 }, () -> {
-                                    context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.not_found", Necessities.coloredFailure(homeName)));
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.not_found", Necessities.coloredFailure(homeName)));
                                 });
                                 return 1;
                             }
@@ -39,14 +39,14 @@ public class HomeCommand implements Command {
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         if (serverPlayer.necessities$getHomes().isEmpty()) {
-                            context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.no_homes"));
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.no_homes"));
                             return 0;
                         } else if (serverPlayer.necessities$getHomes().size() == 1) {
                             serverPlayer.necessities$teleport(serverPlayer.necessities$getHomes().getFirst().position);
-                            context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.home", Necessities.colored(serverPlayer.necessities$getHomes().get(0).name)), true);
+                            serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home", Necessities.colored(serverPlayer.necessities$getHomes().get(0).name)), false);
                             return 1;
                         } else {
-                            context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
                             return 0;
                         }
                     }

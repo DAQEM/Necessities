@@ -20,7 +20,7 @@ public class SetSpawnCommand implements Command {
                 if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer){
                     serverPlayer.necessities$getLevelData().necessities$setSpawnPosition(serverPlayer.necessities$getPosition());
                     context.getSource().getLevel().setDefaultSpawnPos(context.getSource().getPlayer().blockPosition(), 0.0F);
-                    context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.spawn.set"), true);
+                    serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.spawn.set"), false);
                     return 1;
                 } else {
                     context.getSource().sendFailure(NEEDS_PLAYER_ERROR);

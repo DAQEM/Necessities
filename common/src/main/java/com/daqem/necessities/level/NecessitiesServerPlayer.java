@@ -20,7 +20,11 @@ public interface NecessitiesServerPlayer {
     UUID necessities$getUUID();
     Component necessities$getName();
     boolean necessities$isOnline();
-    void necessities$sendSystemMessage(Component message, boolean log);
+    void necessities$sendSystemMessage(Component message, boolean actionBar);
+    void necessities$sendFailedSystemMessage(Component message);
+
+    boolean necessities$hasNecessitiesInstalled();
+    void necessities$setNecessitiesInstalled(boolean installed);
 
     NecessitiesServerLevel necessities$getLevel();
     ServerLevel necessities$getLevel(ResourceLocation dimension);

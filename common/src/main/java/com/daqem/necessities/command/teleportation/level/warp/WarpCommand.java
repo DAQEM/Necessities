@@ -28,9 +28,9 @@ public class WarpCommand implements Command {
                                 String warpName = StringArgumentType.getString(context, "warp");
                                 serverPlayer.necessities$getLevelData().necessities$getWarp(warpName).ifPresentOrElse(warp -> {
                                     serverPlayer.necessities$teleport(warp.position);
-                                    context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.warp", Necessities.colored(warp.name)), true);
+                                    serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.warp", Necessities.colored(warp.name)), false);
                                 }, () -> {
-                                    context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.warp.not_found", Necessities.coloredFailure(warpName)));
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.warp.not_found", Necessities.coloredFailure(warpName)));
                                 });
                                 return 1;
                             }

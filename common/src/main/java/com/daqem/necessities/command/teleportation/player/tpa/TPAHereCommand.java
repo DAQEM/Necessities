@@ -31,7 +31,7 @@ public class TPAHereCommand implements Command {
                                     serverPlayer.necessities$sendTPARequest(targetServerPlayer, true);
                                     return 1;
                                 } else {
-                                    context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.tpa.player_not_found", Necessities.coloredFailure(playerName)));
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.player_not_found", Necessities.coloredFailure(playerName)));
                                     return 0;
                                 }
                             }

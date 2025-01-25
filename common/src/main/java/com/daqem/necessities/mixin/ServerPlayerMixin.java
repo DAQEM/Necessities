@@ -11,12 +11,14 @@ import com.daqem.necessities.model.Position;
 import com.daqem.necessities.model.TPARequest;
 import com.daqem.necessities.utils.ChatFormatter;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.resources.ResourceKey;
@@ -52,6 +54,15 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Shadow
     private boolean disconnected;
 
+    @Shadow
+    public abstract void readAdditionalSaveData(CompoundTag arg);
+
+    @Shadow
+    public abstract void sendChatMessage(OutgoingChatMessage arg, boolean bl, ChatType.Bound arg2);
+
+    @Shadow
+    public abstract void sendSystemMessage(Component arg);
+
     @Unique
     private Map<String, Home> necessities$Homes = new HashMap<>();
 
@@ -66,6 +77,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Unique
     private String necessities$Nick = null;
+
+    @Unique
+    private boolean necessities$hasNecessitiesInstalled = false;
 
     public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super(level, blockPos, f, gameProfile);
@@ -90,8 +104,29 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Override
-    public void necessities$sendSystemMessage(Component message, boolean log) {
-        this.sendSystemMessage(message, log);
+    public void necessities$sendSystemMessage(Component message, boolean actionBar) {
+        if (necessities$hasNecessitiesInstalled()) {
+            this.sendSystemMessage(message, actionBar);
+        } else {
+            this.sendSystemMessage(ChatFormatter.flattenToLiteral(message), actionBar);
+        }
+    }
+
+
+
+    @Override
+    public void necessities$sendFailedSystemMessage(Component message) {
+        this.necessities$sendSystemMessage(Component.empty().append(message).withStyle(ChatFormatting.RED), false);
+    }
+
+    @Override
+    public boolean necessities$hasNecessitiesInstalled() {
+        return necessities$hasNecessitiesInstalled;
+    }
+
+    @Override
+    public void necessities$setNecessitiesInstalled(boolean installed) {
+        necessities$hasNecessitiesInstalled = installed;
     }
 
     @Override
@@ -197,21 +232,21 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Override
     public void necessities$sendTPARequest(NecessitiesServerPlayer player, boolean isHere) {
         if (!player.necessities$isOnline()) {
-            this.sendSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.receiver_offline", player.necessities$getName()), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.receiver_offline", player.necessities$getName()), false);
             return;
         }
 
         if (!player.necessities$acceptsTPARequests()) {
-            this.sendSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.receiver_requests_disabled", player.necessities$getName()), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.receiver_requests_disabled", player.necessities$getName()), false);
             return;
         }
 
         TPARequest request = new TPARequest(this, player, System.currentTimeMillis(), isHere);
         player.necessities$receiveTPARequest(request);
         if (request.isHere) {
-            this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.sent.here", player.necessities$getName()), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.sent.here", player.necessities$getName()), false);
         } else {
-            this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.sent", player.necessities$getName()), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.sent", player.necessities$getName()), false);
         }
     }
 
@@ -219,23 +254,23 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public void necessities$receiveTPARequest(TPARequest request) {
         this.necessities$addTPARequest(request);
         if (request.isHere) {
-            this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.received.here", request.sender.necessities$getName()), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.received.here", request.sender.necessities$getName()), false);
         } else {
-            this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.received", request.sender.necessities$getName()), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.received", request.sender.necessities$getName()), false);
         }
     }
 
     @Override
     public void necessities$acceptTPARequest(TPARequest request) {
         if (!request.sender.necessities$isOnline()) {
-            this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.sender_offline", request.sender.necessities$getName()), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.sender_offline", request.sender.necessities$getName()), false);
         } else {
             if (request.isHere) {
-                this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted.here", request.sender.necessities$getName()), false);
+                this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted.here", request.sender.necessities$getName()), false);
                 request.sender.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted.here.sender", this.necessities$getName()), false);
                 this.necessities$teleport(request.sender.necessities$getPosition());
             } else {
-                this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted", request.sender.necessities$getName()), false);
+                this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted", request.sender.necessities$getName()), false);
                 request.sender.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted.sender", this.necessities$getName()), false);
                 request.sender.necessities$teleport(this.necessities$getPosition());
             }
@@ -247,7 +282,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public void necessities$acceptTPARequest() {
         List<TPARequest> requests = this.necessities$getTPARequests();
         if (requests.isEmpty()) {
-            this.sendSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.no_requests"), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.no_requests"), false);
         } else {
             TPARequest request = requests.getFirst();
             this.necessities$acceptTPARequest(request);
@@ -258,14 +293,14 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public void necessities$denyTPARequest(TPARequest request) {
         this.necessities$removeTPARequest(request);
         request.sender.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.denied", this.necessities$getName()), false);
-        this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.denied.sender", request.sender.necessities$getName()), false);
+        this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.denied.sender", request.sender.necessities$getName()), false);
     }
 
     @Override
     public void necessities$denyTPARequest() {
         List<TPARequest> requests = this.necessities$getTPARequests();
         if (requests.isEmpty()) {
-            this.sendSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.no_requests"), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.no_requests"), false);
         } else {
             TPARequest request = requests.getFirst();
             this.necessities$denyTPARequest(request);
@@ -276,9 +311,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public void necessities$toggleTPARequests() {
         this.necessities$acceptsTPARequests = !this.necessities$acceptsTPARequests;
         if (this.necessities$acceptsTPARequests) {
-            this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.requests_enabled"), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.requests_enabled"), false);
         } else {
-            this.sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.requests_disabled"), false);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.requests_disabled"), false);
         }
     }
 
@@ -300,14 +335,14 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Override
     public void necessities$setNick(String nick) {
         this.necessities$Nick = nick;
-        this.sendSystemMessage(Necessities.prefixedTranslatable("commands.nick.set", necessities$getName()), false);
+        this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.nick.set", necessities$getName()), false);
         this.necessities$broadcastNickChange();
     }
 
     @Override
     public void necessities$removeNick() {
         this.necessities$Nick = "";
-        this.sendSystemMessage(Necessities.prefixedTranslatable("commands.nick.removed"), false);
+        this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.nick.removed"), false);
         this.necessities$broadcastNickChange();
     }
 

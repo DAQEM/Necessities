@@ -25,13 +25,13 @@ public class DeleteWarpCommand implements Command {
                             return SharedSuggestionProvider.suggest(new ArrayList<>(), builder);
                         })
                         .executes(context -> {
-                            if (context.getSource() instanceof NecessitiesCommandSourceStack source) {
+                            if (context.getSource() instanceof NecessitiesCommandSourceStack source && context.getSource() instanceof NecessitiesServerPlayer serverPlayer) {
                                 String warpName = StringArgumentType.getString(context, "warp");
                                 source.necessities$getLevelData().necessities$getWarp(warpName).ifPresentOrElse(warp -> {
                                     source.necessities$getLevelData().necessities$removeWarp(warp.name);
-                                    context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.warp.delete", Necessities.colored(warp.name)), true);
+                                    serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.warp.delete", Necessities.colored(warp.name)), false);
                                 }, () -> {
-                                    context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.warp.not_found", Necessities.coloredFailure(warpName)));
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.warp.not_found", Necessities.coloredFailure(warpName)));
                                 });
                                 return 1;
                             }

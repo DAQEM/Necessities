@@ -17,7 +17,7 @@ public class SpawnCommand implements Command {
                         if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                             Position spawnPos = serverPlayer.necessities$getLevelData().necessities$getSpawnPosition();
                             serverPlayer.necessities$teleport(spawnPos);
-                            context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.spawn"), true);
+                            serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.spawn"), false);
                             return 1;
                         }
                     } else {

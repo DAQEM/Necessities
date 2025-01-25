@@ -16,10 +16,10 @@ public class BackCommand implements Command {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         if (serverPlayer.necessities$hasLastPosition()) {
                             serverPlayer.necessities$teleport(serverPlayer.necessities$getLastPosition());
-                            context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.back"), true);
+                            serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.back"), false);
                             return 1;
                         } else {
-                            context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.back.no_last_position"));
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.back.no_last_position"));
                             return 0;
                         }
                     }

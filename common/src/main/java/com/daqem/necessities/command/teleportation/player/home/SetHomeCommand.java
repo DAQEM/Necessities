@@ -25,10 +25,10 @@ public class SetHomeCommand implements Command {
                                 try {
                                     serverPlayer.necessities$addHome(home);
                                 } catch (HomeLimitReachedException e) {
-                                    context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.limit"));
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.limit"));
                                     return 0;
                                 }
-                                context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.home.set", Necessities.colored(name)), true);
+                                serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home.set", Necessities.colored(name)), false);
                                 return 1;
                             } else {
                                 context.getSource().sendFailure(NEEDS_PLAYER_ERROR);
@@ -42,18 +42,18 @@ public class SetHomeCommand implements Command {
                             try {
                                 serverPlayer.necessities$addHome(home);
                             } catch (HomeLimitReachedException e) {
-                                context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.limit"));
+                                serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.limit"));
                                 return 0;
                             }
-                            context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.home.set", Necessities.colored("home")), true);
+                            serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home.set", Necessities.colored("home")), false);
                             return 1;
                         } else if (serverPlayer.necessities$getHomes().size() == 1) {
                             Home home = new Home("home", serverPlayer.necessities$getPosition());
                             serverPlayer.necessities$setHomes(List.of(home));
-                            context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.home.set", Necessities.colored("home")), true);
+                            serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home.set", Necessities.colored("home")), false);
                             return 1;
                         } else {
-                            context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
                             return 0;
                         }
                     }

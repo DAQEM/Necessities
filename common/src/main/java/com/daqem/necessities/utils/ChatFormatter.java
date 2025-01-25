@@ -1,6 +1,9 @@
 package com.daqem.necessities.utils;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+
+import java.util.Optional;
 
 public class ChatFormatter {
 
@@ -13,5 +16,20 @@ public class ChatFormatter {
             }
         }
         return Component.literal(new String(b));
+    }
+
+    public static MutableComponent flattenToLiteral(Component component) {
+        StringBuilder builder = new StringBuilder();
+        component.getContents().visit(string -> {
+            builder.append(string);
+            return Optional.empty();
+        });
+        MutableComponent literalComponent = Component.literal(builder.toString()).withStyle(component.getStyle());
+
+        for (Component sibling : component.getSiblings()) {
+            literalComponent.append(flattenToLiteral(sibling));
+        }
+
+        return literalComponent;
     }
 }

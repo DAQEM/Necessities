@@ -22,7 +22,7 @@ public class SetWarpCommand implements Command {
                                 String name = StringArgumentType.getString(context, "name");
                                 Warp warp = new Warp(name, serverPLayer.necessities$getPosition());
                                 serverPLayer.necessities$getLevelData().necessities$addWarp(warp);
-                                context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.warp.set", Necessities.colored(name)), true);
+                                serverPLayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.warp.set", Necessities.colored(name)), false);
                                 return 1;
                             } else {
                                 context.getSource().sendFailure(NEEDS_PLAYER_ERROR);

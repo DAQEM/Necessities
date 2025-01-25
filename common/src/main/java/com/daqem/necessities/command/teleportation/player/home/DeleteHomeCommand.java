@@ -29,9 +29,9 @@ public class DeleteHomeCommand implements Command {
                                 String homeName = StringArgumentType.getString(context, "home");
                                 serverPlayer.necessities$getHome(homeName).ifPresentOrElse(home -> {
                                     serverPlayer.necessities$removeHome(home.name);
-                                    context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.home.delete", Necessities.colored(home.name)), true);
+                                    serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home.delete", Necessities.colored(home.name)), false);
                                 }, () -> {
-                                    context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.not_found", Necessities.coloredFailure(homeName)));
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.not_found", Necessities.coloredFailure(homeName)));
                                 });
                                 return 1;
                             }
@@ -41,15 +41,15 @@ public class DeleteHomeCommand implements Command {
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         if (serverPlayer.necessities$getHomes().isEmpty()) {
-                            context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.no_homes"));
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.no_homes"));
                             return 0;
                         } else if (serverPlayer.necessities$getHomes().size() == 1) {
                             Home home = serverPlayer.necessities$getHomes().getFirst();
                             serverPlayer.necessities$removeHome(home.name);
-                            context.getSource().sendSuccess(() -> Necessities.prefixedTranslatable("commands.home.delete", Necessities.colored(home.name)), true);
+                            serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home.delete", Necessities.colored(home.name)), false);
                             return 1;
                         } else {
-                            context.getSource().sendFailure(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
                             return 0;
                         }
                     }
