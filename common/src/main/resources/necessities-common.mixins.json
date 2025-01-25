@@ -7,6 +7,7 @@
   ],
   "mixins": [
     "CommandSourceStackMixin",
+    "PlayerMixin",
     "PrimaryLevelDataMixin",
     "ServerLevelMixin",
     "ServerPlayerMixin"

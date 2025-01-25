@@ -9,17 +9,21 @@ import com.daqem.necessities.level.storage.NecessitiesLevelData;
 import com.daqem.necessities.model.Home;
 import com.daqem.necessities.model.Position;
 import com.daqem.necessities.model.TPARequest;
+import com.daqem.necessities.utils.ChatFormatter;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -45,7 +49,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Shadow
     public abstract void sendSystemMessage(Component arg, boolean bl);
 
-    @Shadow private boolean disconnected;
+    @Shadow
+    private boolean disconnected;
 
     @Unique
     private Map<String, Home> necessities$Homes = new HashMap<>();
@@ -59,6 +64,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Unique
     private boolean necessities$acceptsTPARequests = true;
 
+    @Unique
+    private String necessities$Nick = null;
+
     public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super(level, blockPos, f, gameProfile);
     }
@@ -70,6 +78,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public Component necessities$getName() {
+        if (this.necessities$getNick() != null) {
+            return ChatFormatter.formatTest(this.necessities$getNick());
+        }
         return Necessities.coloredLiteral(this.getGameProfile().getName());
     }
 
@@ -276,12 +287,45 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         return necessities$acceptsTPARequests;
     }
 
+    @Override
+    public String necessities$getNick() {
+        return this.necessities$Nick;
+    }
+
+    @Override
+    public boolean necessities$hasNick() {
+        return this.necessities$Nick != null && !this.necessities$Nick.isEmpty();
+    }
+
+    @Override
+    public void necessities$setNick(String nick) {
+        this.necessities$Nick = nick;
+        this.sendSystemMessage(Necessities.prefixedTranslatable("commands.nick.set", necessities$getName()), false);
+        this.necessities$broadcastNickChange();
+    }
+
+    @Override
+    public void necessities$removeNick() {
+        this.necessities$Nick = "";
+        this.sendSystemMessage(Necessities.prefixedTranslatable("commands.nick.removed"), false);
+        this.necessities$broadcastNickChange();
+    }
+
+    @Override
+    public void necessities$broadcastNickChange() {
+        if (this.getServer() instanceof MinecraftServer server) {
+            server.getPlayerList().broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of((ServerPlayer) (Object) this)));
+        }
+    }
+
     @Inject(at = @At("TAIL"), method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V")
     public void restoreFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
         if (oldPlayer instanceof NecessitiesServerPlayer oldNecessitiesServerPlayer) {
             this.necessities$Homes = oldNecessitiesServerPlayer.necessities$getHomes().stream()
                     .collect(Collectors.toMap(home -> home.name, home -> home));
             this.necessities$LastPosition = oldNecessitiesServerPlayer.necessities$getLastPosition();
+            this.necessities$acceptsTPARequests = oldNecessitiesServerPlayer.necessities$acceptsTPARequests();
+            this.necessities$Nick = oldNecessitiesServerPlayer.necessities$getNick();
         }
     }
 
@@ -292,6 +336,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         necessitiesTag.put("Warps", necessities$Homes.values().stream().map(Home::serialize)
                 .collect(Collectors.toCollection(ListTag::new)));
         necessitiesTag.put("LastPosition", necessities$LastPosition.serialize());
+        necessitiesTag.putBoolean("AcceptsTPARequests", necessities$acceptsTPARequests);
+        necessitiesTag.putString("Nick", necessities$Nick);
 
         compoundTag.put("Necessities", necessitiesTag);
     }
@@ -304,5 +350,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
                 .map(tag -> Home.deserialize((CompoundTag) tag))
                 .collect(Collectors.toMap(home -> home.name, home -> home));
         this.necessities$LastPosition = Position.deserialize(necessitiesTag.getCompound("LastPosition"));
+        this.necessities$acceptsTPARequests = necessitiesTag.getBoolean("AcceptsTPARequests");
+        this.necessities$Nick = necessitiesTag.getString("Nick");
     }
 }

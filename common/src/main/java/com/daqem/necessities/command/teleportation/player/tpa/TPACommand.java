@@ -42,6 +42,7 @@ public class TPACommand implements Command {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         serverPlayer.necessities$acceptTPARequest();
                     }
+                    context.getSource().sendFailure(NEEDS_PLAYER_ERROR);
                     return 0;
                 })
         );

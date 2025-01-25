@@ -3,21 +3,12 @@ package com.daqem.necessities;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.event.RegisterCommandsEvent;
 import com.google.common.base.Suppliers;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.logging.LogUtils;
 import dev.architectury.registry.registries.RegistrarManager;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.synchronization.ArgumentTypeInfo;
-import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
-import java.lang.reflect.Field;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class Necessities {
@@ -62,7 +53,11 @@ public class Necessities {
 
     public static MutableComponent getPrefix(int color) {
         return colored(translatable("prefix.left_bracket"), 0xFFFFFF)
-                .append(colored(translatable("prefix.name"), color))
+                .append(colored(
+                        NecessitiesConfig.prefix.get().isEmpty() ?
+                                translatable("prefix.name") :
+                                literal(NecessitiesConfig.prefix.get())
+                        , color))
                 .append(colored(translatable("prefix.right_bracket"), 0xFFFFFF))
                 .append(translatable("prefix.space"));
     }

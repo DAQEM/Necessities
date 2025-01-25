@@ -8,6 +8,8 @@ import com.daqem.necessities.model.TPARequest;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,4 +52,10 @@ public interface NecessitiesServerPlayer {
     void necessities$denyTPARequest();
     void necessities$toggleTPARequests();
     boolean necessities$acceptsTPARequests();
+
+    String necessities$getNick();
+    boolean necessities$hasNick();
+    void necessities$setNick(String nick);
+    void necessities$removeNick();
+    void necessities$broadcastNickChange();
 }
