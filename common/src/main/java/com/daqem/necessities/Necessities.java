@@ -4,6 +4,7 @@ import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.event.PlayerJoinEvent;
 import com.daqem.necessities.event.RegisterCommandsEvent;
 import com.daqem.necessities.networking.NecessitiesNetworking;
+import com.daqem.necessities.utils.ChatFormatter;
 import com.google.common.base.Suppliers;
 import com.mojang.logging.LogUtils;
 import dev.architectury.registry.registries.RegistrarManager;
@@ -65,7 +66,7 @@ public class Necessities {
                 .append(colored(
                         NecessitiesConfig.prefix.get().isEmpty() ?
                                 translatable("prefix.name") :
-                                literal(NecessitiesConfig.prefix.get())
+                                ChatFormatter.format(NecessitiesConfig.prefix.get())
                         , color))
                 .append(colored(translatable("prefix.right_bracket"), 0xFFFFFF))
                 .append(translatable("prefix.space"));

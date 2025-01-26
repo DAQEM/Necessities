@@ -1,4 +1,4 @@
-package com.daqem.necessities.command.player;
+package com.daqem.necessities.command.chat;
 
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;

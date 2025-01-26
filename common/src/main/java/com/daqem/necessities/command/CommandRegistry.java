@@ -1,9 +1,10 @@
 package com.daqem.necessities.command;
 
+import com.daqem.necessities.command.chat.BroadcastCommand;
 import com.daqem.necessities.command.player.AFKCommand;
 import com.daqem.necessities.command.player.DelNickCommand;
 import com.daqem.necessities.command.player.NickCommand;
-import com.daqem.necessities.command.player.ReplyCommand;
+import com.daqem.necessities.command.chat.ReplyCommand;
 import com.daqem.necessities.command.teleportation.level.spawn.SetSpawnCommand;
 import com.daqem.necessities.command.teleportation.level.spawn.SpawnCommand;
 import com.daqem.necessities.command.teleportation.level.warp.DeleteWarpCommand;
@@ -63,6 +64,7 @@ public interface CommandRegistry {
     Command AFK = register(new AFKCommand());
 
     Command REPLY = register(new ReplyCommand());
+    Command BROADCAST = register(new BroadcastCommand());
 
     static Command register(Command command) {
         COMMANDS.add(command);

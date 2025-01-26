@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class ChatFormatter {
 
-    public static Component format(String input) {
+    public static MutableComponent format(String input) {
         char[] b = input.toCharArray();
         for (int i = 0; i < b.length - 1; i++) {
             if (b[i] == '&' && "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx".indexOf(b[i + 1]) > -1) {
@@ -19,7 +19,7 @@ public class ChatFormatter {
         return Component.literal(new String(b));
     }
 
-    public static Component flattenToLiteral(Component component) {
+    public static MutableComponent flattenToLiteral(Component component) {
         MutableComponent builder = Component.empty();
         component.visit((style, string) -> {
             builder.append(Component.literal(string).withStyle(style));
