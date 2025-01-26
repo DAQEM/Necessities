@@ -2,12 +2,13 @@ package com.daqem.necessities.utils;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
 import java.util.Optional;
 
 public class ChatFormatter {
 
-    public static Component formatTest(String input) {
+    public static Component format(String input) {
         char[] b = input.toCharArray();
         for (int i = 0; i < b.length - 1; i++) {
             if (b[i] == '&' && "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx".indexOf(b[i + 1]) > -1) {
@@ -18,18 +19,12 @@ public class ChatFormatter {
         return Component.literal(new String(b));
     }
 
-    public static MutableComponent flattenToLiteral(Component component) {
-        StringBuilder builder = new StringBuilder();
-        component.getContents().visit(string -> {
-            builder.append(string);
+    public static Component flattenToLiteral(Component component) {
+        MutableComponent builder = Component.empty();
+        component.visit((style, string) -> {
+            builder.append(Component.literal(string).withStyle(style));
             return Optional.empty();
-        });
-        MutableComponent literalComponent = Component.literal(builder.toString()).withStyle(component.getStyle());
-
-        for (Component sibling : component.getSiblings()) {
-            literalComponent.append(flattenToLiteral(sibling));
-        }
-
-        return literalComponent;
+        }, Style.EMPTY);
+        return builder;
     }
 }

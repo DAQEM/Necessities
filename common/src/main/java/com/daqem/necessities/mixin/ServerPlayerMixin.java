@@ -18,7 +18,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.resources.ResourceKey;
@@ -35,6 +34,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -93,7 +93,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Override
     public Component necessities$getName() {
         if (this.necessities$getNick() != null) {
-            return ChatFormatter.formatTest(this.necessities$getNick());
+            return ChatFormatter.format(this.necessities$getNick());
         }
         return Necessities.coloredLiteral(this.getGameProfile().getName());
     }
@@ -178,7 +178,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public void necessities$addHome(Home home) throws HomeLimitReachedException {
         Integer homesLimit = NecessitiesConfig.homesLimit.get();
         if (homesLimit > 0 && necessities$Homes.size() >= homesLimit) {
-            throw new HomeLimitReachedException();
+            if (!necessities$Homes.containsKey(home.name)) {
+                throw new HomeLimitReachedException();
+            }
         }
         necessities$Homes.put(home.name, home);
     }
@@ -387,5 +389,12 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         this.necessities$LastPosition = Position.deserialize(necessitiesTag.getCompound("LastPosition"));
         this.necessities$acceptsTPARequests = necessitiesTag.getBoolean("AcceptsTPARequests");
         this.necessities$Nick = necessitiesTag.getString("Nick");
+    }
+
+    @Inject(at = @At("TAIL"), method = "getTabListDisplayName()Lnet/minecraft/network/chat/Component;", cancellable = true)
+    public void getTabListDisplayName(CallbackInfoReturnable<Component> cir) {
+        if (this.necessities$hasNick()) {
+            cir.setReturnValue(ChatFormatter.format(this.necessities$getNick()));
+        }
     }
 }
