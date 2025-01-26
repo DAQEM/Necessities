@@ -49,6 +49,7 @@
   "necessities.commands.nick.removed": "Your nickname has been reset.",
   "necessities.commands.afk.set": "%s is now AFK.",
   "necessities.commands.afk.removed": "%s is no longer AFK.",
+  "necessities.commands.afk.already": "You are already AFK.",
   "necessities.commands.reply.no_last_sender": "You don't have anyone to reply to. They might have logged out.",
   "yamlconfig.necessities": "Necessities",
   "yamlconfig.necessities.necessities": "Configuration",

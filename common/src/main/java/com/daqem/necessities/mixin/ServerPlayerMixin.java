@@ -386,6 +386,10 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public void necessities$setAFK(boolean afk) {
+        if (afk && necessities$isAFK) {
+            this.necessities$sendSystemMessage(Necessities.prefixedFailureTranslatable("commands.afk.already"), false);
+            return;
+        }
         necessities$isAFK = afk;
         necessities$AFKPosition = necessities$getPosition();
         if (afk) {
