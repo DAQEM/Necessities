@@ -45,6 +45,10 @@ public class Necessities {
         return getPrefix().append(translatable(str, args));
     }
 
+    public static MutableComponent prefixedVanillaTranslatable(String str, Object... args) {
+        return getPrefix().append(Component.translatable(str, args));
+    }
+
     public static MutableComponent prefixedFailureTranslatable(String str) {
         return getFailurePrefix().append(translatable(str));
     }

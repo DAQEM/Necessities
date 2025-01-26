@@ -69,4 +69,9 @@ public interface NecessitiesServerPlayer {
 
     Optional<NecessitiesServerPlayer> necessities$getLastMessageSender();
     void necessities$setLastMessageSender(UUID senderUUID);
+
+    boolean necessities$hasGodMode();
+    void necessities$setGodMode(boolean godMode);
+    void necessities$toggleGodMode();
+
 }

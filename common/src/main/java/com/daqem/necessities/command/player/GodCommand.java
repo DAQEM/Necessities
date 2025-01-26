@@ -1,4 +1,4 @@
-package com.daqem.necessities.command.teleportation.player.tpa;
+package com.daqem.necessities.command.player;
 
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
@@ -10,11 +10,12 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
 
-public class TPACommand implements Command {
+public class GodCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("tpa")
+        dispatcher.register(Commands.literal("god")
+                .requires(source -> source.hasPermission(2))
                 .then(Commands.argument("player", StringArgumentType.string())
                         .suggests((context, builder) ->
                                 SharedSuggestionProvider.suggest(
@@ -28,10 +29,15 @@ public class TPACommand implements Command {
                                         .filter(player -> player != context.getSource().getPlayer())
                                         .filter(player -> player.getGameProfile().getName().equals(playerName)).findFirst().orElse(null);
                                 if (target instanceof NecessitiesServerPlayer targetServerPlayer) {
-                                    serverPlayer.necessities$sendTPARequest(targetServerPlayer, false);
+                                    targetServerPlayer.necessities$toggleGodMode();
+                                    if (targetServerPlayer.necessities$hasGodMode()) {
+                                        serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.god.toggled.other.on", targetServerPlayer.necessities$getName()), false);
+                                    } else {
+                                        serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.god.toggled.other.off", targetServerPlayer.necessities$getName()), false);
+                                    }
                                     return 1;
                                 } else {
-                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.tpa.player_not_found", Necessities.coloredFailure(playerName)));
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.god.player_not_found", Necessities.coloredFailure(playerName)));
                                     return 0;
                                 }
                             }
@@ -40,12 +46,11 @@ public class TPACommand implements Command {
                         }))
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
-                        serverPlayer.necessities$acceptTPARequest();
+                        serverPlayer.necessities$toggleGodMode();
                         return 1;
                     }
                     context.getSource().sendFailure(NEEDS_PLAYER_ERROR);
                     return 0;
-                })
-        );
+                }));
     }
 }

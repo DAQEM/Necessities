@@ -26,6 +26,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -93,6 +94,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Unique
     private @Nullable UUID necessities$lastMessageSender = null;
+
+    @Unique
+    private boolean necessities$hasGodMode = false;
 
     public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super(level, blockPos, f, gameProfile);
@@ -419,6 +423,26 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         necessities$lastMessageSender = senderUUID;
     }
 
+    @Override
+    public boolean necessities$hasGodMode() {
+        return necessities$hasGodMode;
+    }
+
+    @Override
+    public void necessities$setGodMode(boolean godMode) {
+        necessities$hasGodMode = godMode;
+        if (godMode) {
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.god.toggled.on"), false);
+        } else {
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.god.toggled.off"), false);
+        }
+    }
+
+    @Override
+    public void necessities$toggleGodMode() {
+        necessities$setGodMode(!necessities$hasGodMode);
+    }
+
     @Inject(at = @At("TAIL"), method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V")
     public void restoreFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
         if (oldPlayer instanceof NecessitiesServerPlayer oldNecessitiesServerPlayer) {
@@ -427,6 +451,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             this.necessities$LastPosition = oldNecessitiesServerPlayer.necessities$getLastPosition();
             this.necessities$acceptsTPARequests = oldNecessitiesServerPlayer.necessities$acceptsTPARequests();
             this.necessities$Nick = oldNecessitiesServerPlayer.necessities$getNick();
+            this.necessities$hasGodMode = oldNecessitiesServerPlayer.necessities$hasGodMode();
         }
     }
 
@@ -439,6 +464,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         necessitiesTag.put("LastPosition", necessities$LastPosition.serialize());
         necessitiesTag.putBoolean("AcceptsTPARequests", necessities$acceptsTPARequests);
         necessitiesTag.putString("Nick", necessities$Nick);
+        necessitiesTag.putBoolean("GodMode", necessities$hasGodMode);
 
         compoundTag.put("Necessities", necessitiesTag);
     }
@@ -453,6 +479,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         this.necessities$LastPosition = Position.deserialize(necessitiesTag.getCompound("LastPosition"));
         this.necessities$acceptsTPARequests = necessitiesTag.getBoolean("AcceptsTPARequests");
         this.necessities$Nick = necessitiesTag.getString("Nick");
+        this.necessities$hasGodMode = necessitiesTag.getBoolean("GodMode");
     }
 
     @Inject(at = @At("TAIL"), method = "getTabListDisplayName()Lnet/minecraft/network/chat/Component;", cancellable = true)
@@ -484,6 +511,13 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
                 || type.is(ChatType.TEAM_MSG_COMMAND_OUTGOING)
                 || type.is(ChatType.SAY_COMMAND)
                 || type.is(ChatType.EMOTE_COMMAND);
+    }
+
+    @Inject(at = @At("HEAD"), method = "isInvulnerableTo(Lnet/minecraft/world/damagesource/DamageSource;)Z", cancellable = true)
+    public void isInvulnerableTo(DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
+        if (necessities$hasGodMode()) {
+            cir.setReturnValue(true);
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "tick()V")
