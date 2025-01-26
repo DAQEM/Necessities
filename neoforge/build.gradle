@@ -115,7 +115,7 @@ curseforge {
         }
 
         addGameVersion "Java 21"
-        addGameVersion "Forge"
+        addGameVersion "NeoForge"
 
         relations {
             project.curseforge_dependencies.split(',').each { dep ->
@@ -124,7 +124,7 @@ curseforge {
         }
 
         mainArtifact(remapJar) {
-            displayName = "$project.mod_name Forge $project.minecraft_version - $project.mod_version"
+            displayName = "$project.mod_name NeoForge $project.mod_version"
         }
 
         addArtifact(remapSourcesJar) {
@@ -135,13 +135,13 @@ curseforge {
 modrinth {
     token = System.getenv("MODRINTH_API_KEY")
     projectId = project.modrinth_project_id
-    versionName = "$project.mod_name Forge $project.minecraft_version - $project.mod_version"
+    versionName = "$project.mod_name NeoForge $project.mod_version"
     versionNumber = "$project.mod_version"
     versionType = "$project.release_type"
     uploadFile = remapJar
     additionalFiles = [remapSourcesJar]
     gameVersions = project.supported_minecraft_versions.split(',').toList()
-    loaders = ["forge"]
+    loaders = ["neoforge"]
     changelog = rootProject.file('changelog.md').text
     dependencies {
         project.modrinth_dependencies.split(',').each { dep ->
