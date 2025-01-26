@@ -81,6 +81,12 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Unique
     private boolean necessities$hasNecessitiesInstalled = false;
 
+    @Unique
+    private boolean necessities$isAFK = false;
+
+    @Unique
+    private Position necessities$AFKPosition = Position.ZERO;
+
     public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super(level, blockPos, f, gameProfile);
     }
@@ -112,7 +118,18 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         }
     }
 
+    @Override
+    public void necessities$broadcastSystemMessage(Component message, boolean actionBar) {
+        if (this.getServer() instanceof MinecraftServer server) {
+            server.sendSystemMessage(message);
 
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (player instanceof NecessitiesServerPlayer necessitiesServerPlayer) {
+                    necessitiesServerPlayer.necessities$sendSystemMessage(message, actionBar);
+                }
+            }
+        }
+    }
 
     @Override
     public void necessities$sendFailedSystemMessage(Component message) {
@@ -355,6 +372,22 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         }
     }
 
+    @Override
+    public boolean necessities$isAFK() {
+        return necessities$isAFK;
+    }
+
+    @Override
+    public void necessities$setAFK(boolean afk) {
+        necessities$isAFK = afk;
+        necessities$AFKPosition = necessities$getPosition();
+        if (afk) {
+            this.necessities$broadcastSystemMessage(Necessities.prefixedTranslatable("commands.afk.set", necessities$getName()), false);
+        } else {
+            this.necessities$broadcastSystemMessage(Necessities.prefixedTranslatable("commands.afk.removed", necessities$getName()), false);
+        }
+    }
+
     @Inject(at = @At("TAIL"), method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V")
     public void restoreFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
         if (oldPlayer instanceof NecessitiesServerPlayer oldNecessitiesServerPlayer) {
@@ -395,6 +428,13 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public void getTabListDisplayName(CallbackInfoReturnable<Component> cir) {
         if (this.necessities$hasNick()) {
             cir.setReturnValue(ChatFormatter.format(this.necessities$getNick()));
+        }
+    }
+
+    @Inject(at = @At("HEAD"), method = "tick()V")
+    public void tick(CallbackInfo ci) {
+        if (this.necessities$isAFK() && !this.necessities$getPosition().equals(this.necessities$AFKPosition)) {
+            this.necessities$setAFK(false);
         }
     }
 }

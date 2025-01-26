@@ -47,6 +47,8 @@
   "necessities.commands.tpa.receiver_requests_disabled": "%s has disabled teleport requests.",
   "necessities.commands.nick.set": "Your nickname has been set to: %s.",
   "necessities.commands.nick.removed": "Your nickname has been reset.",
+  "necessities.commands.afk.set": "%s is now AFK.",
+  "necessities.commands.afk.removed": "%s is no longer AFK.",
   "yamlconfig.necessities": "Necessities",
   "yamlconfig.necessities.necessities": "Configuration",
   "yamlconfig.necessities.necessities.general": "General",

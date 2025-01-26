@@ -1,5 +1,6 @@
 package com.daqem.necessities.command;
 
+import com.daqem.necessities.command.player.AFKCommand;
 import com.daqem.necessities.command.player.DelNickCommand;
 import com.daqem.necessities.command.player.NickCommand;
 import com.daqem.necessities.command.teleportation.level.spawn.SetSpawnCommand;
@@ -57,6 +58,8 @@ public interface CommandRegistry {
 
     Command NICK = register(new NickCommand());
     Command DEL_NICK = register(new DelNickCommand());
+
+    Command AFK = register(new AFKCommand());
 
     static Command register(Command command) {
         COMMANDS.add(command);

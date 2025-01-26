@@ -21,6 +21,7 @@ public interface NecessitiesServerPlayer {
     Component necessities$getName();
     boolean necessities$isOnline();
     void necessities$sendSystemMessage(Component message, boolean actionBar);
+    void necessities$broadcastSystemMessage(Component message, boolean actionBar);
     void necessities$sendFailedSystemMessage(Component message);
 
     boolean necessities$hasNecessitiesInstalled();
@@ -62,4 +63,7 @@ public interface NecessitiesServerPlayer {
     void necessities$setNick(String nick);
     void necessities$removeNick();
     void necessities$broadcastNickChange();
+
+    boolean necessities$isAFK();
+    void necessities$setAFK(boolean afk);
 }
