@@ -13,6 +13,7 @@ import com.daqem.necessities.utils.ChatFormatter;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -28,6 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -63,6 +65,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Shadow
     public abstract void sendSystemMessage(Component arg);
 
+    @Shadow protected abstract boolean acceptsChatMessages();
+
     @Unique
     private Map<String, Home> necessities$Homes = new HashMap<>();
 
@@ -86,6 +90,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Unique
     private Position necessities$AFKPosition = Position.ZERO;
+
+    @Unique
+    private @Nullable UUID necessities$lastMessageSender = null;
 
     public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
         super(level, blockPos, f, gameProfile);
@@ -388,6 +395,26 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         }
     }
 
+    @Override
+    public Optional<NecessitiesServerPlayer> necessities$getLastMessageSender() {
+        if (necessities$lastMessageSender == null) {
+            return Optional.empty();
+        }
+
+        if (this.getServer() instanceof MinecraftServer server) {
+            ServerPlayer player = server.getPlayerList().getPlayer(necessities$lastMessageSender);
+            if (player instanceof NecessitiesServerPlayer necessitiesServerPlayer) {
+                return Optional.of(necessitiesServerPlayer);
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public void necessities$setLastMessageSender(UUID senderUUID) {
+        necessities$lastMessageSender = senderUUID;
+    }
+
     @Inject(at = @At("TAIL"), method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V")
     public void restoreFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
         if (oldPlayer instanceof NecessitiesServerPlayer oldNecessitiesServerPlayer) {
@@ -429,6 +456,30 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         if (this.necessities$hasNick()) {
             cir.setReturnValue(ChatFormatter.format(this.necessities$getNick()));
         }
+    }
+
+    @Inject(at = @At("HEAD"), method = "sendChatMessage(Lnet/minecraft/network/chat/OutgoingChatMessage;ZLnet/minecraft/network/chat/ChatType$Bound;)V")
+    public void sendChatMessage(OutgoingChatMessage message, boolean bl, ChatType.Bound bound, CallbackInfo ci) {
+        if (necessities$isAFK() && necessities$sendsMessageThemself(bound.chatType())) {
+            necessities$setAFK(false);
+        }
+
+        if (this.acceptsChatMessages()) {
+            if (bound.chatType().is(ChatType.MSG_COMMAND_INCOMING) || bound.chatType().is(ChatType.TEAM_MSG_COMMAND_INCOMING)) {
+                if (message instanceof OutgoingChatMessage.Player playerMessage) {
+                    necessities$setLastMessageSender(playerMessage.message().link().sender());
+                }
+            }
+        }
+    }
+
+    @Unique
+    private boolean necessities$sendsMessageThemself(Holder<ChatType> type) {
+        return type.is(ChatType.CHAT)
+                || type.is(ChatType.MSG_COMMAND_OUTGOING)
+                || type.is(ChatType.TEAM_MSG_COMMAND_OUTGOING)
+                || type.is(ChatType.SAY_COMMAND)
+                || type.is(ChatType.EMOTE_COMMAND);
     }
 
     @Inject(at = @At("HEAD"), method = "tick()V")

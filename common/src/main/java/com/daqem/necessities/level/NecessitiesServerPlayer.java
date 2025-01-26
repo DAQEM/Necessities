@@ -66,4 +66,7 @@ public interface NecessitiesServerPlayer {
 
     boolean necessities$isAFK();
     void necessities$setAFK(boolean afk);
+
+    Optional<NecessitiesServerPlayer> necessities$getLastMessageSender();
+    void necessities$setLastMessageSender(UUID senderUUID);
 }
