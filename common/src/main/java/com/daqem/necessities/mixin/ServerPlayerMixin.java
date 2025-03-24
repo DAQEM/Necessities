@@ -66,7 +66,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Shadow
     public abstract void sendSystemMessage(Component arg);
 
-    @Shadow protected abstract boolean acceptsChatMessages();
+    @Shadow
+    protected abstract boolean acceptsChatMessages();
 
     @Unique
     private Map<String, Home> necessities$Homes = new HashMap<>();
@@ -457,16 +458,21 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Inject(at = @At("TAIL"), method = "addAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V")
     public void addAdditionalSaveData(CompoundTag compoundTag, CallbackInfo ci) {
-        CompoundTag necessitiesTag = new CompoundTag();
+        try {
+            CompoundTag necessitiesTag = new CompoundTag();
 
-        necessitiesTag.put("Warps", necessities$Homes.values().stream().map(Home::serialize)
-                .collect(Collectors.toCollection(ListTag::new)));
-        necessitiesTag.put("LastPosition", necessities$LastPosition.serialize());
-        necessitiesTag.putBoolean("AcceptsTPARequests", necessities$acceptsTPARequests);
-        necessitiesTag.putString("Nick", necessities$Nick);
-        necessitiesTag.putBoolean("GodMode", necessities$hasGodMode);
+            necessitiesTag.put("Warps", necessities$Homes.values().stream().map(Home::serialize)
+                    .collect(Collectors.toCollection(ListTag::new)));
+            necessitiesTag.put("LastPosition", necessities$LastPosition.serialize());
+            necessitiesTag.putBoolean("AcceptsTPARequests", necessities$acceptsTPARequests);
+            necessitiesTag.putString("Nick", necessities$Nick == null ? "" : necessities$Nick);
+            necessitiesTag.putBoolean("GodMode", necessities$hasGodMode);
 
-        compoundTag.put("Necessities", necessitiesTag);
+            compoundTag.put("Necessities", necessitiesTag);
+        } catch (Exception e) {
+            Necessities.LOGGER.error("Failed to save Necessities data for player " + this.getGameProfile().getName());
+            e.printStackTrace();
+        }
     }
 
     @Inject(at = @At("TAIL"), method = "readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V")
@@ -479,6 +485,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         this.necessities$LastPosition = Position.deserialize(necessitiesTag.getCompound("LastPosition"));
         this.necessities$acceptsTPARequests = necessitiesTag.getBoolean("AcceptsTPARequests");
         this.necessities$Nick = necessitiesTag.getString("Nick");
+        if (this.necessities$Nick.isEmpty()) this.necessities$Nick = null;
         this.necessities$hasGodMode = necessitiesTag.getBoolean("GodMode");
     }
 
