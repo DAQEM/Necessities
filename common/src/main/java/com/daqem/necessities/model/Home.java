@@ -13,8 +13,8 @@ public class Home {
     }
 
     public static Home deserialize(CompoundTag tag) {
-        String name = tag.getString("Name");
-        Position position = Position.deserialize(tag.getCompound("Position"));
+        String name = tag.getString("Name").orElse("");
+        Position position = tag.getCompound("Position").map(Position::deserialize).orElse(Position.ZERO);
         return new Home(name, position);
     }
 
