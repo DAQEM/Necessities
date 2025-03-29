@@ -37,12 +37,12 @@ public class Position {
     }
 
     public static Position deserialize(CompoundTag tag) {
-        double x = tag.getDouble("X");
-        double y = tag.getDouble("Y");
-        double z = tag.getDouble("Z");
-        float yaw = tag.getFloat("Yaw");
-        float pitch = tag.getFloat("Pitch");
-        ResourceLocation dimension = ResourceLocation.parse(tag.getString("Dimension"));
+        double x = tag.getDouble("X").orElse(0D);
+        double y = tag.getDouble("Y").orElse(0D);
+        double z = tag.getDouble("Z").orElse(0D);
+        float yaw = tag.getFloat("Yaw").orElse(0F);
+        float pitch = tag.getFloat("Pitch").orElse(0F);
+        ResourceLocation dimension = ResourceLocation.parse(tag.getString("Dimension").orElse("minecraft:overworld"));
         return new Position(x, y, z, yaw, pitch, dimension);
     }
 

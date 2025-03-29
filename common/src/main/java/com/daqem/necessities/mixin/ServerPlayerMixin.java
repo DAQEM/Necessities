@@ -27,6 +27,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -44,9 +45,6 @@ import java.util.stream.Collectors;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player implements NecessitiesServerPlayer {
-
-    @Shadow
-    public abstract void teleportTo(ServerLevel serverLevel, double d, double e, double f, float g, float h);
 
     @Shadow
     public abstract ServerLevel serverLevel();
@@ -68,6 +66,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Shadow
     protected abstract boolean acceptsChatMessages();
+
+    @Shadow public abstract boolean teleportTo(ServerLevel arg, double d, double e, double f, Set<Relative> set, float g, float h, boolean bl);
 
     @Unique
     private Map<String, Home> necessities$Homes = new HashMap<>();
@@ -190,7 +190,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public void necessities$teleport(Position position) {
         ServerLevel serverLevel = necessities$getLevel(position.dimension);
         this.necessities$setLastPosition();
-        this.teleportTo(serverLevel, position.x, position.y, position.z, position.yaw, position.pitch);
+        this.teleportTo(serverLevel, position.x, position.y, position.z, Set.of(), position.yaw, position.pitch, true);
     }
 
     @Override
@@ -477,16 +477,23 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Inject(at = @At("TAIL"), method = "readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V")
     public void readAdditionalSaveData(CompoundTag compoundTag, CallbackInfo ci) {
-        CompoundTag necessitiesTag = compoundTag.getCompound("Necessities");
-
-        this.necessities$Homes = necessitiesTag.getList("Warps", 10).stream()
-                .map(tag -> Home.deserialize((CompoundTag) tag))
-                .collect(Collectors.toMap(home -> home.name, home -> home));
-        this.necessities$LastPosition = Position.deserialize(necessitiesTag.getCompound("LastPosition"));
-        this.necessities$acceptsTPARequests = necessitiesTag.getBoolean("AcceptsTPARequests");
-        this.necessities$Nick = necessitiesTag.getString("Nick");
-        if (this.necessities$Nick.isEmpty()) this.necessities$Nick = null;
-        this.necessities$hasGodMode = necessitiesTag.getBoolean("GodMode");
+        compoundTag.getCompound("Necessities").ifPresent(necessitiesTag -> {
+            necessitiesTag.getList("Warps").ifPresent(homesTag ->
+                    this.necessities$Homes = homesTag.stream()
+                    .map(tag -> Home.deserialize((CompoundTag) tag))
+                    .collect(Collectors.toMap(home -> home.name, home -> home)));
+            necessitiesTag.getCompound("LastPosition").ifPresent(lastPositionTag ->
+                    this.necessities$LastPosition = Position.deserialize(lastPositionTag));
+            necessitiesTag.getBoolean("AcceptsTPARequests").ifPresent(acceptsTPARequests ->
+                    this.necessities$acceptsTPARequests = acceptsTPARequests);
+            necessitiesTag.getString("Nick").ifPresent(nick -> {
+                if (!nick.isEmpty()) {
+                    this.necessities$Nick = nick;
+                }
+            });
+            necessitiesTag.getBoolean("GodMode").ifPresent(hasGodMode ->
+                    this.necessities$hasGodMode = hasGodMode);
+        });
     }
 
     @Inject(at = @At("TAIL"), method = "getTabListDisplayName()Lnet/minecraft/network/chat/Component;", cancellable = true)
@@ -520,8 +527,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
                 || type.is(ChatType.EMOTE_COMMAND);
     }
 
-    @Inject(at = @At("HEAD"), method = "isInvulnerableTo(Lnet/minecraft/world/damagesource/DamageSource;)Z", cancellable = true)
-    public void isInvulnerableTo(DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(at = @At("HEAD"), method = "isInvulnerableTo", cancellable = true)
+    public void isInvulnerableTo(ServerLevel serverLevel, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         if (necessities$hasGodMode()) {
             cir.setReturnValue(true);
         }
