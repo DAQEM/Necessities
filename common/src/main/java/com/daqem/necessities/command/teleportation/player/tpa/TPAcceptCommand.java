@@ -14,6 +14,7 @@ public class TPAcceptCommand implements Command {
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         serverPlayer.necessities$acceptTPARequest();
+                        return 1;
                     }
                     context.getSource().sendFailure(NEEDS_PLAYER_ERROR);
                     return 0;

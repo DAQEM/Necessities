@@ -53,7 +53,7 @@ public class SetHomeCommand implements Command {
                             serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home.set", Necessities.colored("home")), false);
                             return 1;
                         } else {
-                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes.set"));
                             return 0;
                         }
                     }

@@ -59,6 +59,7 @@ public interface NecessitiesServerPlayer {
     boolean necessities$acceptsTPARequests();
 
     String necessities$getNick();
+    String necessities$getNonNullNick();
     boolean necessities$hasNick();
     void necessities$setNick(String nick);
     void necessities$removeNick();

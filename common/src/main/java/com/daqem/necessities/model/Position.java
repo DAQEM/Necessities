@@ -1,6 +1,8 @@
 package com.daqem.necessities.model;
 
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
@@ -9,6 +11,16 @@ import java.util.Objects;
 public class Position {
 
     public static final Position ZERO = new Position(0, 0, 0, 0, 0, ResourceLocation.parse("overworld"));
+    public static final Codec<Position> CODEC = RecordCodecBuilder.create(
+            instance -> instance.group(
+                    Codec.DOUBLE.fieldOf("X").forGetter(position -> position.x),
+                    Codec.DOUBLE.fieldOf("Y").forGetter(position -> position.y),
+                    Codec.DOUBLE.fieldOf("Z").forGetter(position -> position.z),
+                    Codec.FLOAT.fieldOf("Yaw").forGetter(position -> position.yaw),
+                    Codec.FLOAT.fieldOf("Pitch").forGetter(position -> position.pitch),
+                    ResourceLocation.CODEC.fieldOf("Dimension").forGetter(position -> position.dimension)
+            ).apply(instance, Position::new)
+    );
 
     public double x;
     public double y;

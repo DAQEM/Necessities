@@ -1,8 +1,15 @@
 package com.daqem.necessities.model;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 
 public class Home {
+
+    public static final Codec<Home> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.fieldOf("name").forGetter(home -> home.name),
+            Position.CODEC.fieldOf("position").forGetter(home -> home.position)
+    ).apply(instance, Home::new));
 
     public final String name;
     public final Position position;

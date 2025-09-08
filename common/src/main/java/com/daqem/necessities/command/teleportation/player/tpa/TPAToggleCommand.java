@@ -14,6 +14,7 @@ public class TPAToggleCommand implements Command {
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         serverPlayer.necessities$toggleTPARequests();
+                        return 1;
                     }
                     context.getSource().sendFailure(NEEDS_PLAYER_ERROR);
                     return 0;

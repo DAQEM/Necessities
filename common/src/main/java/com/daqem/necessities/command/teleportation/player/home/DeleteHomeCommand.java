@@ -49,7 +49,7 @@ public class DeleteHomeCommand implements Command {
                             serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home.delete", Necessities.colored(home.name)), false);
                             return 1;
                         } else {
-                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes.del"));
                             return 0;
                         }
                     }

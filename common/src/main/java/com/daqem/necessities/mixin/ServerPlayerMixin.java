@@ -8,18 +8,17 @@ import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.level.storage.NecessitiesLevelData;
 import com.daqem.necessities.model.Home;
 import com.daqem.necessities.model.Position;
+import com.daqem.necessities.model.ServerPlayerData;
 import com.daqem.necessities.model.TPARequest;
 import com.daqem.necessities.utils.ChatFormatter;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +29,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,8 +47,9 @@ import java.util.stream.Collectors;
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player implements NecessitiesServerPlayer {
 
-    @Shadow
-    public abstract ServerLevel serverLevel();
+    public ServerPlayerMixin(Level level, GameProfile gameProfile) {
+        super(level, gameProfile);
+    }
 
     @Shadow
     public abstract void sendSystemMessage(Component arg, boolean bl);
@@ -56,18 +58,11 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     private boolean disconnected;
 
     @Shadow
-    public abstract void readAdditionalSaveData(CompoundTag arg);
-
-    @Shadow
-    public abstract void sendChatMessage(OutgoingChatMessage arg, boolean bl, ChatType.Bound arg2);
-
-    @Shadow
-    public abstract void sendSystemMessage(Component arg);
-
-    @Shadow
     protected abstract boolean acceptsChatMessages();
 
     @Shadow public abstract boolean teleportTo(ServerLevel arg, double d, double e, double f, Set<Relative> set, float g, float h, boolean bl);
+
+    @Shadow public abstract ServerLevel level();
 
     @Unique
     private Map<String, Home> necessities$Homes = new HashMap<>();
@@ -99,10 +94,6 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Unique
     private boolean necessities$hasGodMode = false;
 
-    public ServerPlayerMixin(Level level, BlockPos blockPos, float f, GameProfile gameProfile) {
-        super(level, blockPos, f, gameProfile);
-    }
-
     @Override
     public UUID necessities$getUUID() {
         return this.getUUID();
@@ -110,7 +101,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public Component necessities$getName() {
-        if (this.necessities$getNick() != null) {
+        if (this.necessities$getNick() != null && !this.necessities$getNick().isEmpty()) {
             return ChatFormatter.format(this.necessities$getNick());
         }
         return Necessities.coloredLiteral(this.getGameProfile().getName());
@@ -160,7 +151,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public NecessitiesServerLevel necessities$getLevel() {
-        return (NecessitiesServerLevel) this.serverLevel();
+        return (NecessitiesServerLevel) this.level();
     }
 
     @Override
@@ -359,6 +350,11 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Override
+    public String necessities$getNonNullNick() {
+        return this.necessities$Nick == null ? "" : this.necessities$Nick;
+    }
+
+    @Override
     public boolean necessities$hasNick() {
         return this.necessities$Nick != null && !this.necessities$Nick.isEmpty();
     }
@@ -456,43 +452,28 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "addAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V")
-    public void addAdditionalSaveData(CompoundTag compoundTag, CallbackInfo ci) {
-        try {
-            CompoundTag necessitiesTag = new CompoundTag();
-
-            necessitiesTag.put("Warps", necessities$Homes.values().stream().map(Home::serialize)
-                    .collect(Collectors.toCollection(ListTag::new)));
-            necessitiesTag.put("LastPosition", necessities$LastPosition.serialize());
-            necessitiesTag.putBoolean("AcceptsTPARequests", necessities$acceptsTPARequests);
-            necessitiesTag.putString("Nick", necessities$Nick == null ? "" : necessities$Nick);
-            necessitiesTag.putBoolean("GodMode", necessities$hasGodMode);
-
-            compoundTag.put("Necessities", necessitiesTag);
-        } catch (Exception e) {
-            Necessities.LOGGER.error("Failed to save Necessities data for player " + this.getGameProfile().getName());
-            e.printStackTrace();
-        }
+    @Inject(at = @At("TAIL"), method = "addAdditionalSaveData")
+    public void addAdditionalSaveData(ValueOutput valueOutput, CallbackInfo ci) {
+        valueOutput.store("Necessities", ServerPlayerData.CODEC, new ServerPlayerData(
+                this.necessities$getHomes(),
+                this.necessities$getLastPosition(),
+                this.necessities$acceptsTPARequests(),
+                this.necessities$getNonNullNick(),
+                this.necessities$hasGodMode()
+        ));
     }
 
-    @Inject(at = @At("TAIL"), method = "readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V")
-    public void readAdditionalSaveData(CompoundTag compoundTag, CallbackInfo ci) {
-        compoundTag.getCompound("Necessities").ifPresent(necessitiesTag -> {
-            necessitiesTag.getList("Warps").ifPresent(homesTag ->
-                    this.necessities$Homes = homesTag.stream()
-                    .map(tag -> Home.deserialize((CompoundTag) tag))
-                    .collect(Collectors.toMap(home -> home.name, home -> home)));
-            necessitiesTag.getCompound("LastPosition").ifPresent(lastPositionTag ->
-                    this.necessities$LastPosition = Position.deserialize(lastPositionTag));
-            necessitiesTag.getBoolean("AcceptsTPARequests").ifPresent(acceptsTPARequests ->
-                    this.necessities$acceptsTPARequests = acceptsTPARequests);
-            necessitiesTag.getString("Nick").ifPresent(nick -> {
-                if (!nick.isEmpty()) {
-                    this.necessities$Nick = nick;
-                }
-            });
-            necessitiesTag.getBoolean("GodMode").ifPresent(hasGodMode ->
-                    this.necessities$hasGodMode = hasGodMode);
+    @Inject(at = @At("TAIL"), method = "readAdditionalSaveData")
+    public void readAdditionalSaveData(ValueInput valueInput, CallbackInfo ci) {
+        valueInput.read("Necessities", ServerPlayerData.CODEC).ifPresent(data -> {
+            this.necessities$Homes = data.homes().stream()
+                    .collect(Collectors.toMap(home -> home.name, home -> home));
+            this.necessities$LastPosition = data.lastPosition();
+            this.necessities$acceptsTPARequests = data.acceptsTPARequests();
+            if (data.nick() != null && !data.nick().isEmpty()) {
+                this.necessities$Nick = data.nick();
+            }
+            this.necessities$hasGodMode = data.hasGodMode();
         });
     }
 
@@ -511,8 +492,10 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
         if (this.acceptsChatMessages()) {
             if (bound.chatType().is(ChatType.MSG_COMMAND_INCOMING) || bound.chatType().is(ChatType.TEAM_MSG_COMMAND_INCOMING)) {
-                if (message instanceof OutgoingChatMessage.Player playerMessage) {
-                    necessities$setLastMessageSender(playerMessage.message().link().sender());
+                if (message instanceof OutgoingChatMessage.Player(
+                        PlayerChatMessage playerMessage
+                )) {
+                    necessities$setLastMessageSender(playerMessage.link().sender());
                 }
             }
         }

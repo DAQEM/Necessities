@@ -46,7 +46,7 @@ public class HomeCommand implements Command {
                             serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home", Necessities.colored(serverPlayer.necessities$getHomes().get(0).name)), false);
                             return 1;
                         } else {
-                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes"));
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes.get"));
                             return 0;
                         }
                     }
