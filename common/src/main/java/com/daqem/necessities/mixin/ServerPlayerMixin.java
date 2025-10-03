@@ -13,6 +13,7 @@ import com.daqem.necessities.model.TPARequest;
 import com.daqem.necessities.utils.ChatFormatter;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
@@ -29,6 +30,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -104,7 +106,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         if (this.necessities$getNick() != null && !this.necessities$getNick().isEmpty()) {
             return ChatFormatter.format(this.necessities$getNick());
         }
-        return Necessities.coloredLiteral(this.getGameProfile().getName());
+        return Necessities.coloredLiteral(this.getGameProfile().name());
     }
 
     @Override
@@ -123,7 +125,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public void necessities$broadcastSystemMessage(Component message, boolean actionBar) {
-        if (this.getServer() instanceof MinecraftServer server) {
+        if (this.level().getServer() instanceof MinecraftServer server) {
             server.sendSystemMessage(message);
 
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -156,14 +158,12 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public ServerLevel necessities$getLevel(ResourceLocation dimension) {
-        if (this.getServer() == null) return (ServerLevel) necessities$getOverworld();
-        return this.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, dimension));
+        return this.level().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, dimension));
     }
 
     @Override
     public NecessitiesServerLevel necessities$getOverworld() {
-        if (this.getServer() == null) return necessities$getLevel();
-        return (NecessitiesServerLevel) this.getServer().getLevel(Level.OVERWORLD);
+        return (NecessitiesServerLevel) this.level().getServer().getLevel(Level.OVERWORLD);
     }
 
     @Override
@@ -375,7 +375,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public void necessities$broadcastNickChange() {
-        if (this.getServer() instanceof MinecraftServer server) {
+        if (this.level().getServer() instanceof MinecraftServer server) {
             server.getPlayerList().broadcastAll(ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of((ServerPlayer) (Object) this)));
         }
     }
@@ -406,7 +406,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             return Optional.empty();
         }
 
-        if (this.getServer() instanceof MinecraftServer server) {
+        if (this.level().getServer() instanceof MinecraftServer server) {
             ServerPlayer player = server.getPlayerList().getPlayer(necessities$lastMessageSender);
             if (player instanceof NecessitiesServerPlayer necessitiesServerPlayer) {
                 return Optional.of(necessitiesServerPlayer);
@@ -438,6 +438,18 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Override
     public void necessities$toggleGodMode() {
         necessities$setGodMode(!necessities$hasGodMode);
+    }
+
+    @Override
+    public LevelData.RespawnData necessities$getNewRespawnData() {
+        return new LevelData.RespawnData(
+                new GlobalPos(
+                        this.level().dimension(),
+                        this.blockPosition()
+                ),
+                this.getYRot(),
+                this.getXRot()
+        );
     }
 
     @Inject(at = @At("TAIL"), method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V")

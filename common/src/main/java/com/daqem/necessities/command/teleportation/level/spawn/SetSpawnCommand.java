@@ -9,6 +9,7 @@ import com.daqem.necessities.model.Position;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.Vec3;
 
 public class SetSpawnCommand implements Command {
@@ -19,7 +20,7 @@ public class SetSpawnCommand implements Command {
             .executes(context -> {
                 if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer){
                     serverPlayer.necessities$getLevelData().necessities$setSpawnPosition(serverPlayer.necessities$getPosition());
-                    context.getSource().getLevel().setDefaultSpawnPos(context.getSource().getPlayer().blockPosition(), 0.0F);
+                    context.getSource().getLevel().setRespawnData(serverPlayer.necessities$getNewRespawnData());
                     serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.spawn.set"), false);
                     return 1;
                 } else {

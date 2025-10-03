@@ -21,13 +21,13 @@ public class GodCommand implements Command {
                                 SharedSuggestionProvider.suggest(
                                         context.getSource().getServer().getPlayerList().getPlayers().stream()
                                                 .filter(player -> player != context.getSource().getPlayer())
-                                                .map(player -> player.getGameProfile().getName()), builder))
+                                                .map(player -> player.getGameProfile().name()), builder))
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                                 String playerName = StringArgumentType.getString(context, "player");
                                 ServerPlayer target = context.getSource().getServer().getPlayerList().getPlayers().stream()
                                         .filter(player -> player != context.getSource().getPlayer())
-                                        .filter(player -> player.getGameProfile().getName().equals(playerName)).findFirst().orElse(null);
+                                        .filter(player -> player.getGameProfile().name().equals(playerName)).findFirst().orElse(null);
                                 if (target instanceof NecessitiesServerPlayer targetServerPlayer) {
                                     targetServerPlayer.necessities$toggleGodMode();
                                     if (targetServerPlayer.necessities$hasGodMode()) {
