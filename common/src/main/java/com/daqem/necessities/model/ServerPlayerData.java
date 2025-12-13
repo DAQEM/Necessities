@@ -10,7 +10,8 @@ public record ServerPlayerData(
         Position lastPosition,
         boolean acceptsTPARequests,
         String nick,
-        boolean hasGodMode
+        boolean hasGodMode,
+        boolean vanished
 ) {
     public static final Codec<ServerPlayerData> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
@@ -18,7 +19,8 @@ public record ServerPlayerData(
                     Position.CODEC.fieldOf("LastPosition").forGetter(ServerPlayerData::lastPosition),
                     Codec.BOOL.fieldOf("AcceptsTPARequests").forGetter(ServerPlayerData::acceptsTPARequests),
                     Codec.STRING.fieldOf("Nick").forGetter(ServerPlayerData::nick),
-                    Codec.BOOL.fieldOf("GodMode").forGetter(ServerPlayerData::hasGodMode)
+                    Codec.BOOL.fieldOf("GodMode").forGetter(ServerPlayerData::hasGodMode),
+                    Codec.BOOL.optionalFieldOf("Vanished", false).forGetter(ServerPlayerData::vanished)
             ).apply(instance, ServerPlayerData::new)
     );
 }

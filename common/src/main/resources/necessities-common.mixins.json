@@ -6,7 +6,9 @@
   "client": [
   ],
   "mixins": [
+    "ChunkMapTrackedEntityMixin",
     "CommandSourceStackMixin",
+    "PlayerListMixin",
     "PlayerMixin",
     "PrimaryLevelDataMixin",
     "ServerLevelMixin",

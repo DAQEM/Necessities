@@ -1,8 +1,8 @@
 package com.daqem.necessities.command;
 
 import com.daqem.necessities.command.chat.BroadcastCommand;
-import com.daqem.necessities.command.player.*;
 import com.daqem.necessities.command.chat.ReplyCommand;
+import com.daqem.necessities.command.player.*;
 import com.daqem.necessities.command.teleportation.level.spawn.SetSpawnCommand;
 import com.daqem.necessities.command.teleportation.level.spawn.SpawnCommand;
 import com.daqem.necessities.command.teleportation.level.warp.DeleteWarpCommand;
@@ -60,6 +60,11 @@ public interface CommandRegistry {
     Command DEL_NICK = register(new DelNickCommand());
 
     Command AFK = register(new AFKCommand());
+    Command FLY = register(new FlyCommand());
+    Command HEAL = register(new HealCommand());
+    Command FEED = register(new FeedCommand());
+
+    Command VANISH = register(new VanishCommand());
 
     Command REPLY = register(new ReplyCommand());
     Command BROADCAST = register(new BroadcastCommand());

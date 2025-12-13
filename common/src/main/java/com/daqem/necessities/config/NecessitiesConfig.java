@@ -18,6 +18,7 @@ public class NecessitiesConfig {
 
     public static final IConfigEntry<Integer> homesLimit;
 
+    public static final IConfigEntry<Boolean> allowBackOnDeath;
     public static final IConfigEntry<Integer> tpaTimeout;
 
     static {
@@ -48,7 +49,9 @@ public class NecessitiesConfig {
                 .withComments("The maximum amount of homes a player can have.");
         config.pop();
 
-        config.push("tpa");
+        config.push("teleportation");
+        allowBackOnDeath = config.defineBoolean("allowBackOnDeath", true)
+                .withComments("If true, players can use /back to return to their death location.");
         tpaTimeout = config.defineInteger("tpaTimeout", 60, 0, Integer.MAX_VALUE)
                 .withComments("The time in seconds a TPA request will be pending.");
         config.pop();

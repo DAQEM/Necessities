@@ -6,10 +6,8 @@ import net.neoforged.fml.common.Mod;
 
 @Mod(Necessities.MOD_ID)
 public class NecessitiesNeoForge {
+
     public NecessitiesNeoForge() {
-        EnvExecutor.getEnvSpecific(
-                () -> SideProxyNeoForge.Client::new,
-                () -> SideProxyNeoForge.Server::new
-        );
+        Necessities.init();
     }
 }

@@ -1,6 +1,7 @@
 package com.daqem.necessities;
 
 import com.daqem.necessities.config.NecessitiesConfig;
+import com.daqem.necessities.event.PlayerDeathEvent;
 import com.daqem.necessities.event.PlayerJoinEvent;
 import com.daqem.necessities.event.RegisterCommandsEvent;
 import com.daqem.necessities.networking.NecessitiesNetworking;
@@ -31,6 +32,7 @@ public class Necessities {
     private static void registerEvents() {
         RegisterCommandsEvent.registerEvent();
         PlayerJoinEvent.registerEvent();
+        PlayerDeathEvent.registerEvent();
     }
 
     public static ResourceLocation getId(String path) {

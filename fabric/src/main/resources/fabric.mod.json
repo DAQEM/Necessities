@@ -17,9 +17,6 @@
   "entrypoints": {
     "main": [
       "com.daqem.necessities.fabric.NecessitiesCommonFabric"
-    ],
-    "client": [
-      "com.daqem.necessities.fabric.NecessitiesClientFabric"
     ]
   },
   "mixins": [

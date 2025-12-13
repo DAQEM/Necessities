@@ -9,8 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.LevelData;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -76,6 +74,8 @@ public interface NecessitiesServerPlayer {
     void necessities$setGodMode(boolean godMode);
     void necessities$toggleGodMode();
 
-    LevelData.RespawnData necessities$getNewRespawnData();
+    boolean necessities$isVanished();
+    void necessities$setVanished(boolean vanished);
 
+    LevelData.RespawnData necessities$getNewRespawnData();
 }

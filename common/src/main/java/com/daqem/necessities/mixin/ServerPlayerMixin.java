@@ -20,7 +20,9 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -62,9 +64,11 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Shadow
     protected abstract boolean acceptsChatMessages();
 
-    @Shadow public abstract boolean teleportTo(ServerLevel arg, double d, double e, double f, Set<Relative> set, float g, float h, boolean bl);
+    @Shadow
+    public abstract boolean teleportTo(ServerLevel arg, double d, double e, double f, Set<Relative> set, float g, float h, boolean bl);
 
-    @Shadow public abstract ServerLevel level();
+    @Shadow
+    public abstract ServerLevel level();
 
     @Unique
     private Map<String, Home> necessities$Homes = new HashMap<>();
@@ -95,6 +99,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Unique
     private boolean necessities$hasGodMode = false;
+
+    @Unique
+    private boolean necessities$vanished = false;
 
     @Override
     public UUID necessities$getUUID() {
@@ -441,6 +448,60 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Override
+    public boolean necessities$isVanished() {
+        return necessities$vanished;
+    }
+
+    @Override
+    public void necessities$setVanished(boolean vanished) {
+        this.necessities$vanished = vanished;
+        // Update invisibility metadata first so spawn packets are correct
+        this.setInvisible(vanished);
+
+        MinecraftServer server = this.level().getServer();
+
+        if (vanished) {
+            ClientboundPlayerInfoRemovePacket removePacket = new ClientboundPlayerInfoRemovePacket(List.of(this.getUUID()));
+            ClientboundRemoveEntitiesPacket removeEntitiesPacket = new ClientboundRemoveEntitiesPacket(this.getId());
+            Component leftMessage = Component.translatable("multiplayer.player.left", this.getDisplayName()).withStyle(ChatFormatting.YELLOW);
+
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (player == (Object) this) continue;
+
+                if (!player.hasPermissions(2)) {
+                    player.connection.send(removePacket);
+                    player.connection.send(removeEntitiesPacket);
+                    player.sendSystemMessage(leftMessage);
+                } else {
+                    player.sendSystemMessage(Necessities.prefixedTranslatable("commands.vanish.notify.enabled", this.getDisplayName()).withStyle(ChatFormatting.GRAY));
+                }
+            }
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.vanish.enabled"), true);
+        } else {
+            ClientboundPlayerInfoUpdatePacket addPacket = ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of((ServerPlayer) (Object) this));
+            Component joinMessage = Component.translatable("multiplayer.player.joined", this.getDisplayName()).withStyle(ChatFormatting.YELLOW);
+
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+                if (player == (Object) this) continue;
+
+                if (!player.hasPermissions(2)) {
+                    // Send tab list packet BEFORE spawning the entity
+                    player.connection.send(addPacket);
+                    player.sendSystemMessage(joinMessage);
+                } else {
+                    player.sendSystemMessage(Necessities.prefixedTranslatable("commands.vanish.notify.disabled", this.getDisplayName()).withStyle(ChatFormatting.GRAY));
+                }
+            }
+
+            // Refresh entity tracking for everyone after confirming they have the tab info
+            this.level().getChunkSource().removeEntity(this);
+            this.level().getChunkSource().addEntity(this);
+
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.vanish.disabled"), true);
+        }
+    }
+
+    @Override
     public LevelData.RespawnData necessities$getNewRespawnData() {
         return new LevelData.RespawnData(
                 new GlobalPos(
@@ -461,6 +522,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             this.necessities$acceptsTPARequests = oldNecessitiesServerPlayer.necessities$acceptsTPARequests();
             this.necessities$Nick = oldNecessitiesServerPlayer.necessities$getNick();
             this.necessities$hasGodMode = oldNecessitiesServerPlayer.necessities$hasGodMode();
+            this.necessities$vanished = oldNecessitiesServerPlayer.necessities$isVanished();
         }
     }
 
@@ -471,7 +533,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
                 this.necessities$getLastPosition(),
                 this.necessities$acceptsTPARequests(),
                 this.necessities$getNonNullNick(),
-                this.necessities$hasGodMode()
+                this.necessities$hasGodMode(),
+                this.necessities$isVanished()
         ));
     }
 
@@ -486,6 +549,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
                 this.necessities$Nick = data.nick();
             }
             this.necessities$hasGodMode = data.hasGodMode();
+            this.necessities$vanished = data.vanished();
         });
     }
 
@@ -533,6 +597,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public void tick(CallbackInfo ci) {
         if (this.necessities$isAFK() && !this.necessities$getPosition().equals(this.necessities$AFKPosition)) {
             this.necessities$setAFK(false);
+        }
+        if (this.necessities$isVanished()) {
+            this.setInvisible(true); // Enforce invisibility
         }
     }
 }
