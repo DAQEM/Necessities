@@ -1,17 +1,37 @@
 package com.daqem.necessities.mixin;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.exception.HomeLimitReachedException;
 import com.daqem.necessities.level.NecessitiesServerLevel;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.level.storage.NecessitiesLevelData;
+import com.daqem.necessities.model.DelayedTeleport;
 import com.daqem.necessities.model.Home;
 import com.daqem.necessities.model.Position;
 import com.daqem.necessities.model.ServerPlayerData;
 import com.daqem.necessities.model.TPARequest;
 import com.daqem.necessities.utils.ChatFormatter;
 import com.mojang.authlib.GameProfile;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
@@ -36,20 +56,15 @@ import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player implements NecessitiesServerPlayer {
+
+    @Unique
+    private DelayedTeleport necessities$DelayedTeleport = null;
+
+    @Unique
+    private Map<String, Long> necessities$TeleportCooldowns = new HashMap<>();
 
     public ServerPlayerMixin(Level level, GameProfile gameProfile) {
         super(level, gameProfile);
@@ -208,6 +223,57 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Override
+    public void necessities$scheduleTeleport(Position position, int delaySeconds, String cooldownType, int cooldownSeconds, java.util.function.Consumer<NecessitiesServerPlayer> onComplete) {
+        if (delaySeconds <= 0) {
+            if (cooldownSeconds > 0) {
+                 this.necessities$setTeleportCooldown(cooldownType, cooldownSeconds);
+            }
+            this.necessities$teleport(position);
+            if (onComplete != null) {
+                onComplete.accept(this);
+            }
+        } else {
+            this.necessities$DelayedTeleport = new DelayedTeleport(position, necessities$getPosition(), System.currentTimeMillis() + (delaySeconds * 1000L), cooldownType, cooldownSeconds, onComplete);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("teleport.delayed", delaySeconds), false);
+        }
+    }
+
+    @Override
+    public DelayedTeleport necessities$getDelayedTeleport() {
+        return necessities$DelayedTeleport;
+    }
+
+    @Override
+    public void necessities$cancelDelayedTeleport() {
+        if (necessities$DelayedTeleport != null) {
+            this.necessities$DelayedTeleport = null;
+            this.necessities$sendSystemMessage(Necessities.prefixedFailureTranslatable("teleport.canceled"), false);
+        }
+    }
+
+    @Override
+    public long necessities$getTeleportCooldown(String type) {
+        return necessities$TeleportCooldowns.getOrDefault(type, 0L);
+    }
+
+    @Override
+    public void necessities$setTeleportCooldown(String type, int cooldownSeconds) {
+         if (cooldownSeconds > 0) {
+            necessities$TeleportCooldowns.put(type, System.currentTimeMillis() + (cooldownSeconds * 1000L));
+         }
+    }
+
+    @Override
+    public Map<String, Long> necessities$getTeleportCooldowns() {
+        return necessities$TeleportCooldowns;
+    }
+
+    @Override
+    public void necessities$setTeleportCooldowns(Map<String, Long> cooldowns) {
+        this.necessities$TeleportCooldowns = cooldowns;
+    }
+
+    @Override
     public void necessities$addHome(Home home) throws HomeLimitReachedException {
         Integer homesLimit = NecessitiesConfig.homesLimit.get();
         if (homesLimit > 0 && necessities$Homes.size() >= homesLimit) {
@@ -300,14 +366,15 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         if (!request.sender.necessities$isOnline()) {
             this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.sender_offline", request.sender.necessities$getName()), false);
         } else {
+            Integer delay = NecessitiesConfig.tpaTeleportDelay.get();
             if (request.isHere) {
                 this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted.here", request.sender.necessities$getName()), false);
                 request.sender.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted.here.sender", this.necessities$getName()), false);
-                this.necessities$teleport(request.sender.necessities$getPosition());
+                this.necessities$scheduleTeleport(request.sender.necessities$getPosition(), delay, null, 0, null);
             } else {
                 this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted", request.sender.necessities$getName()), false);
                 request.sender.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.tpa.accepted.sender", this.necessities$getName()), false);
-                request.sender.necessities$teleport(this.necessities$getPosition());
+                request.sender.necessities$scheduleTeleport(this.necessities$getPosition(), delay, null, 0, null);
             }
             this.necessities$removeTPARequest(request);
         }
@@ -560,6 +627,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             this.necessities$vanished = oldNecessitiesServerPlayer.necessities$isVanished();
             this.necessities$LastRTPTime = oldNecessitiesServerPlayer.necessities$getLastRTPTime();
             this.necessities$KitCooldowns = new HashMap<>(oldNecessitiesServerPlayer.necessities$getKitCooldowns());
+            this.necessities$TeleportCooldowns = new HashMap<>(oldNecessitiesServerPlayer.necessities$getTeleportCooldowns());
         }
     }
 
@@ -573,7 +641,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
                 this.necessities$hasGodMode(),
                 this.necessities$isVanished(),
                 this.necessities$getLastRTPTime(),
-                this.necessities$getKitCooldowns()
+                this.necessities$getKitCooldowns(),
+                this.necessities$getTeleportCooldowns()
         ));
     }
 
@@ -591,6 +660,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             this.necessities$vanished = data.vanished();
             this.necessities$LastRTPTime = data.lastRTPTime();
             this.necessities$KitCooldowns = new HashMap<>(data.kitCooldowns());
+            this.necessities$TeleportCooldowns = new HashMap<>(data.teleportCooldowns());
         });
     }
 
@@ -641,6 +711,21 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         }
         if (this.necessities$isVanished()) {
             this.setInvisible(true); // Enforce invisibility
+        }
+
+        if (this.necessities$DelayedTeleport != null) {
+            if (!this.necessities$getPosition().equalsIgnoreAngle(this.necessities$DelayedTeleport.startPos())) {
+                this.necessities$cancelDelayedTeleport();
+            } else if (System.currentTimeMillis() >= this.necessities$DelayedTeleport.executeAt()) {
+                if (this.necessities$DelayedTeleport.cooldownSeconds() > 0) {
+                    this.necessities$setTeleportCooldown(this.necessities$DelayedTeleport.cooldownType(), this.necessities$DelayedTeleport.cooldownSeconds());
+                }
+                this.necessities$teleport(this.necessities$DelayedTeleport.target());
+                if (this.necessities$DelayedTeleport.onComplete() != null) {
+                    this.necessities$DelayedTeleport.onComplete().accept(this);
+                }
+                this.necessities$DelayedTeleport = null;
+            }
         }
     }
 }

@@ -2,9 +2,11 @@ package com.daqem.necessities.command.teleportation.player.tpa;
 
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -28,6 +30,16 @@ public class TPAHereCommand implements Command {
                                         .filter(player -> player != context.getSource().getPlayer())
                                         .filter(player -> player.getGameProfile().name().equals(playerName)).findFirst().orElse(null);
                                 if (target instanceof NecessitiesServerPlayer targetServerPlayer) {
+                                    Integer cooldown = NecessitiesConfig.tpaCooldown.get();
+                                    if (cooldown > 0) {
+                                        long cooldownTime = serverPlayer.necessities$getTeleportCooldown("tpa");
+                                        if (System.currentTimeMillis() < cooldownTime) {
+                                            long secondsLeft = (cooldownTime - System.currentTimeMillis()) / 1000;
+                                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("teleport.cooldown", secondsLeft));
+                                            return 0;
+                                        }
+                                        serverPlayer.necessities$setTeleportCooldown("tpa", cooldown);
+                                    }
                                     serverPlayer.necessities$sendTPARequest(targetServerPlayer, true);
                                     return 1;
                                 } else {

@@ -1,19 +1,21 @@
 package com.daqem.necessities.level;
 
-import com.daqem.necessities.exception.HomeLimitReachedException;
-import com.daqem.necessities.level.storage.NecessitiesLevelData;
-import com.daqem.necessities.model.Home;
-import com.daqem.necessities.model.Position;
-import com.daqem.necessities.model.TPARequest;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.storage.LevelData;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.daqem.necessities.exception.HomeLimitReachedException;
+import com.daqem.necessities.level.storage.NecessitiesLevelData;
+import com.daqem.necessities.model.DelayedTeleport;
+import com.daqem.necessities.model.Home;
+import com.daqem.necessities.model.Position;
+import com.daqem.necessities.model.TPARequest;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.storage.LevelData;
 
 public interface NecessitiesServerPlayer {
 
@@ -34,6 +36,14 @@ public interface NecessitiesServerPlayer {
     NecessitiesLevelData necessities$getLevelData();
     Position necessities$getPosition();
     void necessities$teleport(Position position);
+    void necessities$scheduleTeleport(Position position, int delaySeconds, String cooldownType, int cooldownSeconds, java.util.function.Consumer<NecessitiesServerPlayer> onComplete);
+    DelayedTeleport necessities$getDelayedTeleport();
+    void necessities$cancelDelayedTeleport();
+
+    long necessities$getTeleportCooldown(String type);
+    void necessities$setTeleportCooldown(String type, int cooldownSeconds);
+    Map<String, Long> necessities$getTeleportCooldowns();
+    void necessities$setTeleportCooldowns(Map<String, Long> cooldowns);
 
     List<Home> necessities$getHomes();
     void necessities$setHomes(List<Home> homes);

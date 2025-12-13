@@ -1,16 +1,18 @@
 package com.daqem.necessities.command.player;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
-
-import java.util.Collection;
-import java.util.Collections;
 
 public class FlyCommand implements Command {
 
@@ -25,6 +27,14 @@ public class FlyCommand implements Command {
     }
 
     private int toggleFlight(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (!NecessitiesConfig.flyAllow.get()) {
+            if (source.getEntity() instanceof NecessitiesServerPlayer serverPlayer) {
+                serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.fly.disabled"));
+            } else {
+                source.sendFailure(Necessities.prefixedFailureTranslatable("commands.fly.disabled"));
+            }
+            return 0;
+        }
         for (ServerPlayer player : targets) {
             boolean canFly = !player.getAbilities().mayfly;
             player.getAbilities().mayfly = canFly;

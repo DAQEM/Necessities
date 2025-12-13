@@ -2,9 +2,11 @@ package com.daqem.necessities.command.player;
 
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -24,6 +26,11 @@ public class GodCommand implements Command {
                                                 .map(player -> player.getGameProfile().name()), builder))
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
+                                if (!NecessitiesConfig.godModeAllow.get()) {
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.god.disabled"));
+                                    return 0;
+                                }
+
                                 String playerName = StringArgumentType.getString(context, "player");
                                 ServerPlayer target = context.getSource().getServer().getPlayerList().getPlayers().stream()
                                         .filter(player -> player != context.getSource().getPlayer())
@@ -46,6 +53,10 @@ public class GodCommand implements Command {
                         }))
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
+                        if (!NecessitiesConfig.godModeAllow.get()) {
+                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.god.disabled"));
+                            return 0;
+                        }
                         serverPlayer.necessities$toggleGodMode();
                         return 1;
                     }

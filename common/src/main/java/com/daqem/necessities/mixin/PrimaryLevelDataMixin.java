@@ -82,6 +82,11 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         OptionalDynamic<T> necessities = dynamic.get("Necessities");
 
         Position necessities$spawnPosition = Position.deserialize(necessities.get("Spawn").orElseEmptyMap());
+
+        if (necessities$spawnPosition.equals(Position.ZERO)) {
+            necessities$spawnPosition = Position.fromRespawnData(cir.getReturnValue().getRespawnData());
+        }
+
         List<Warp> necessities$Warps = necessities.get("Warps").asStream().map(Warp::deserialize)
                 .collect(Collectors.toList());
 
@@ -94,6 +99,10 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     @Inject(method = "setTagData", at = @At("HEAD"))
     private void setTagData(RegistryAccess registryAccess, CompoundTag compoundTag, CompoundTag compoundTag2, CallbackInfo ci) {
         CompoundTag necessitiesTag = new CompoundTag();
+
+        if (this.necessities$spawnPosition.equals(Position.ZERO)) {
+            this.necessities$spawnPosition = Position.fromRespawnData(this.getRespawnData());
+        }
 
         necessitiesTag.put("Spawn", necessities$spawnPosition.serialize());
         necessitiesTag.put("Warps", necessities$Warps.values().stream().map(Warp::serialize)

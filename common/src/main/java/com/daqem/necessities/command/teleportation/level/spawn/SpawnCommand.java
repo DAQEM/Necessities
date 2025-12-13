@@ -2,9 +2,11 @@ package com.daqem.necessities.command.teleportation.level.spawn;
 
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.model.Position;
 import com.mojang.brigadier.CommandDispatcher;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 
@@ -16,8 +18,21 @@ public class SpawnCommand implements Command {
                     if (context.getSource().getPlayer() != null) {
                         if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                             Position spawnPos = serverPlayer.necessities$getLevelData().necessities$getSpawnPosition();
-                            serverPlayer.necessities$teleport(spawnPos);
-                            serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.spawn"), false);
+                            Integer cooldown = NecessitiesConfig.spawnCooldown.get();
+                            Integer delay = NecessitiesConfig.spawnTeleportDelay.get();
+
+                            if (cooldown > 0) {
+                                long cooldownTime = serverPlayer.necessities$getTeleportCooldown("spawn");
+                                if (System.currentTimeMillis() < cooldownTime) {
+                                    long secondsLeft = (cooldownTime - System.currentTimeMillis()) / 1000;
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("teleport.cooldown", secondsLeft));
+                                    return 0;
+                                }
+                            }
+
+                            serverPlayer.necessities$scheduleTeleport(spawnPos, delay, "spawn", cooldown, (player) -> {
+                                player.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.spawn"), false);
+                            });
                             return 1;
                         }
                     } else {

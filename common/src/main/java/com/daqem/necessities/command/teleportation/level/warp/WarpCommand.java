@@ -1,16 +1,17 @@
 package com.daqem.necessities.command.teleportation.level.warp;
 
+import java.util.ArrayList;
+
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
-import com.daqem.necessities.level.NecessitiesServerLevel;
+import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-
-import java.util.ArrayList;
 
 public class WarpCommand implements Command {
 
@@ -27,8 +28,21 @@ public class WarpCommand implements Command {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                                 String warpName = StringArgumentType.getString(context, "warp");
                                 serverPlayer.necessities$getLevelData().necessities$getWarp(warpName).ifPresentOrElse(warp -> {
-                                    serverPlayer.necessities$teleport(warp.position);
-                                    serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.warp", Necessities.colored(warp.name)), false);
+                                    Integer cooldown = NecessitiesConfig.warpCooldown.get();
+                                    Integer delay = NecessitiesConfig.warpTeleportDelay.get();
+
+                                    if (cooldown > 0) {
+                                        long cooldownTime = serverPlayer.necessities$getTeleportCooldown("warp");
+                                        if (System.currentTimeMillis() < cooldownTime) {
+                                            long secondsLeft = (cooldownTime - System.currentTimeMillis()) / 1000;
+                                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("teleport.cooldown", secondsLeft));
+                                            return;
+                                        }
+                                    }
+
+                                    serverPlayer.necessities$scheduleTeleport(warp.position, delay, "warp", cooldown, (player) -> {
+                                        player.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.warp", Necessities.colored(warp.name)), false);
+                                    });
                                 }, () -> {
                                     serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.warp.not_found", Necessities.coloredFailure(warpName)));
                                 });

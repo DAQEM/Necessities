@@ -1,15 +1,17 @@
 package com.daqem.necessities.command.teleportation.player.home;
 
+import java.util.ArrayList;
+
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-
-import java.util.ArrayList;
 
 public class HomeCommand implements Command {
 
@@ -26,8 +28,21 @@ public class HomeCommand implements Command {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                                 String homeName = StringArgumentType.getString(context, "home");
                                 serverPlayer.necessities$getHome(homeName).ifPresentOrElse(home -> {
-                                    serverPlayer.necessities$teleport(home.position);
-                                    serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home", Necessities.colored(home.name)), false);
+                                    Integer cooldown = NecessitiesConfig.homeCooldown.get();
+                                    Integer delay = NecessitiesConfig.homeTeleportDelay.get();
+
+                                    if (cooldown > 0) {
+                                        long cooldownTime = serverPlayer.necessities$getTeleportCooldown("home");
+                                        if (System.currentTimeMillis() < cooldownTime) {
+                                            long secondsLeft = (cooldownTime - System.currentTimeMillis()) / 1000;
+                                            serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("teleport.cooldown", secondsLeft));
+                                            return;
+                                        }
+                                    }
+
+                                    serverPlayer.necessities$scheduleTeleport(home.position, delay, "home", cooldown, (player) -> {
+                                        player.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home", Necessities.colored(home.name)), false);
+                                    });
                                 }, () -> {
                                     serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.not_found", Necessities.coloredFailure(homeName)));
                                 });
@@ -42,8 +57,21 @@ public class HomeCommand implements Command {
                             serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.no_homes"));
                             return 0;
                         } else if (serverPlayer.necessities$getHomes().size() == 1) {
-                            serverPlayer.necessities$teleport(serverPlayer.necessities$getHomes().getFirst().position);
-                            serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home", Necessities.colored(serverPlayer.necessities$getHomes().get(0).name)), false);
+                            Integer cooldown = NecessitiesConfig.homeCooldown.get();
+                            Integer delay = NecessitiesConfig.homeTeleportDelay.get();
+
+                            if (cooldown > 0) {
+                                long cooldownTime = serverPlayer.necessities$getTeleportCooldown("home");
+                                if (System.currentTimeMillis() < cooldownTime) {
+                                    long secondsLeft = (cooldownTime - System.currentTimeMillis()) / 1000;
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("teleport.cooldown", secondsLeft));
+                                    return 0;
+                                }
+                            }
+
+                            serverPlayer.necessities$scheduleTeleport(serverPlayer.necessities$getHomes().getFirst().position, delay, "home", cooldown, (player) -> {
+                                player.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.home", Necessities.colored(serverPlayer.necessities$getHomes().get(0).name)), false);
+                            });
                             return 1;
                         } else {
                             serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.home.multiple_homes.get"));

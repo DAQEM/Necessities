@@ -1,11 +1,14 @@
 package com.daqem.necessities.command.teleportation.level;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.model.Position;
 import com.mojang.brigadier.CommandDispatcher;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
@@ -18,8 +21,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-
-import java.util.concurrent.ThreadLocalRandom;
 
 public class RTPCommand implements Command {
 
@@ -82,16 +83,18 @@ public class RTPCommand implements Command {
                 BlockState blockState = level.getBlockState(targetPos.below());
 
                 if (isSafe(blockState, level, targetPos)) {
-                    serverPlayer.necessities$teleport(new Position(
+                    int delay = NecessitiesConfig.rtpDelay.get();
+                    serverPlayer.necessities$scheduleTeleport(new Position(
                             x + 0.5,
                             y + 0.5,
                             z + 0.5,
                             serverPlayer.necessities$getPosition().yaw,
                             serverPlayer.necessities$getPosition().pitch,
                             level.dimension().location()
-                    ));
-                    serverPlayer.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.rtp.success", x, y, z), false);
-                    serverPlayer.necessities$setLastRTPTime(System.currentTimeMillis());
+                    ), delay, null, 0, (player) -> {
+                        player.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.rtp.success", x, y, z), false);
+                        player.necessities$setLastRTPTime(System.currentTimeMillis());
+                    });
                 } else {
                     attemptRtp(serverPlayer, level, minRadius, maxRadius, attemptsLeft - 1);
                 }
