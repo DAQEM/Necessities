@@ -11,4 +11,8 @@ include("common")
 include("fabric")
 include("neoforge")
 
+include("testmod-common")
+include("testmod-fabric")
+include("testmod-neoforge")
+
 rootProject.name = "Necessities 1.21.9"

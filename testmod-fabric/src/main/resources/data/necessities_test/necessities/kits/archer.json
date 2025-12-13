@@ -1,0 +1,21 @@
+{
+  "cooldown": 7200,
+  "items": [
+    {
+      "id": "minecraft:bow",
+      "count": 1
+    },
+    {
+      "id": "minecraft:arrow",
+      "count": 64
+    },
+    {
+      "id": "minecraft:chainmail_chestplate",
+      "count": 1
+    },
+    {
+      "id": "minecraft:cooked_chicken",
+      "count": 8
+    }
+  ]
+}

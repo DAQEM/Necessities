@@ -4,6 +4,7 @@ import com.daqem.necessities.command.chat.BroadcastCommand;
 import com.daqem.necessities.command.chat.ReplyCommand;
 import com.daqem.necessities.command.inventory.EnderChestCommand;
 import com.daqem.necessities.command.inventory.InvseeCommand;
+import com.daqem.necessities.command.kit.KitCommand;
 import com.daqem.necessities.command.player.*;
 import com.daqem.necessities.command.teleportation.level.RTPCommand;
 import com.daqem.necessities.command.teleportation.level.spawn.SetSpawnCommand;
@@ -79,6 +80,8 @@ public interface CommandRegistry {
 
     Command GOD = register(new GodCommand());
     Command GAMEMODE = register(new GamemodeCommand());
+
+    Command KIT = register(new KitCommand());
 
     static Command register(Command command) {
         COMMANDS.add(command);

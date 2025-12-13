@@ -1,0 +1,29 @@
+{
+  "cooldown": 86400,
+  "items": [
+    {
+      "id": "minecraft:iron_pickaxe",
+      "count": 1
+    },
+    {
+      "id": "minecraft:iron_shovel",
+      "count": 1
+    },
+    {
+      "id": "minecraft:torch",
+      "count": 64
+    },
+    {
+      "id": "minecraft:oak_log",
+      "count": 32
+    },
+    {
+      "id": "minecraft:cooked_beef",
+      "count": 16
+    },
+    {
+      "id": "minecraft:water_bucket",
+      "count": 1
+    }
+  ]
+}

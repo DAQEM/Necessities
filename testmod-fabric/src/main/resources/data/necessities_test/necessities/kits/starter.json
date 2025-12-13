@@ -1,0 +1,37 @@
+{
+  "cooldown": 3600,
+  "items": [
+    {
+      "id": "minecraft:stone_sword",
+      "count": 1
+    },
+    {
+      "id": "minecraft:stone_pickaxe",
+      "count": 1
+    },
+    {
+      "id": "minecraft:stone_axe",
+      "count": 1
+    },
+    {
+      "id": "minecraft:bread",
+      "count": 16
+    },
+    {
+      "id": "minecraft:leather_helmet",
+      "count": 1
+    },
+    {
+      "id": "minecraft:leather_chestplate",
+      "count": 1
+    },
+    {
+      "id": "minecraft:leather_leggings",
+      "count": 1
+    },
+    {
+      "id": "minecraft:leather_boots",
+      "count": 1
+    }
+  ]
+}

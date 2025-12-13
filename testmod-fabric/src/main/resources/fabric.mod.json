@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "necessities_test",
+  "version": "${version}",
+  "name": "Necessities Test Mod",
+  "description": "A test mod for Necessities.",
+  "authors": [
+    "DAQEM"
+  ],
+  "license": "Apache-2.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.daqem.necessities.test.TestMod::init"
+    ]
+  }
+}

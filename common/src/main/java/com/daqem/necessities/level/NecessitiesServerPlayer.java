@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.LevelData;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -81,4 +82,9 @@ public interface NecessitiesServerPlayer {
     void necessities$setVanished(boolean vanished);
 
     LevelData.RespawnData necessities$getNewRespawnData();
+
+    Map<ResourceLocation, Long> necessities$getKitCooldowns();
+    void necessities$setKitCooldowns(Map<ResourceLocation, Long> cooldowns);
+    long necessities$getKitCooldown(ResourceLocation kitId);
+    void necessities$setKitCooldown(ResourceLocation kitId, long timestamp);
 }

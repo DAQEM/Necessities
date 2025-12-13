@@ -1,6 +1,7 @@
 package com.daqem.necessities;
 
 import com.daqem.necessities.config.NecessitiesConfig;
+import com.daqem.necessities.data.KitManager;
 import com.daqem.necessities.event.PlayerDeathEvent;
 import com.daqem.necessities.event.PlayerJoinEvent;
 import com.daqem.necessities.event.RegisterCommandsEvent;
@@ -8,10 +9,12 @@ import com.daqem.necessities.networking.NecessitiesNetworking;
 import com.daqem.necessities.utils.ChatFormatter;
 import com.google.common.base.Suppliers;
 import com.mojang.logging.LogUtils;
+import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.registries.RegistrarManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import org.slf4j.Logger;
 
 import java.util.function.Supplier;
@@ -20,13 +23,11 @@ public class Necessities {
     public static final String MOD_ID = "necessities";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final Supplier<RegistrarManager> MANAGER = Suppliers.memoize(() -> RegistrarManager.get(MOD_ID));
-
-
     public static void init() {
         NecessitiesConfig.init();
         NecessitiesNetworking.init();
         registerEvents();
+        ReloadListenerRegistry.register(PackType.SERVER_DATA, new KitManager(), getId("kits"));
     }
 
     private static void registerEvents() {

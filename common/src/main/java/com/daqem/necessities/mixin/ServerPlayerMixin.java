@@ -106,6 +106,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Unique
     private long necessities$LastRTPTime = 0;
 
+    @Unique
+    private Map<ResourceLocation, Long> necessities$KitCooldowns = new HashMap<>();
+
     @Override
     public UUID necessities$getUUID() {
         return this.getUUID();
@@ -525,6 +528,26 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
         );
     }
 
+    @Override
+    public Map<ResourceLocation, Long> necessities$getKitCooldowns() {
+        return necessities$KitCooldowns;
+    }
+
+    @Override
+    public void necessities$setKitCooldowns(Map<ResourceLocation, Long> cooldowns) {
+        this.necessities$KitCooldowns = cooldowns;
+    }
+
+    @Override
+    public long necessities$getKitCooldown(ResourceLocation kitId) {
+        return necessities$KitCooldowns.getOrDefault(kitId, 0L);
+    }
+
+    @Override
+    public void necessities$setKitCooldown(ResourceLocation kitId, long timestamp) {
+        necessities$KitCooldowns.put(kitId, timestamp);
+    }
+
     @Inject(at = @At("TAIL"), method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V")
     public void restoreFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
         if (oldPlayer instanceof NecessitiesServerPlayer oldNecessitiesServerPlayer) {
@@ -536,6 +559,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             this.necessities$hasGodMode = oldNecessitiesServerPlayer.necessities$hasGodMode();
             this.necessities$vanished = oldNecessitiesServerPlayer.necessities$isVanished();
             this.necessities$LastRTPTime = oldNecessitiesServerPlayer.necessities$getLastRTPTime();
+            this.necessities$KitCooldowns = new HashMap<>(oldNecessitiesServerPlayer.necessities$getKitCooldowns());
         }
     }
 
@@ -548,7 +572,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
                 this.necessities$getNonNullNick(),
                 this.necessities$hasGodMode(),
                 this.necessities$isVanished(),
-                this.necessities$getLastRTPTime()
+                this.necessities$getLastRTPTime(),
+                this.necessities$getKitCooldowns()
         ));
     }
 
@@ -565,6 +590,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             this.necessities$hasGodMode = data.hasGodMode();
             this.necessities$vanished = data.vanished();
             this.necessities$LastRTPTime = data.lastRTPTime();
+            this.necessities$KitCooldowns = new HashMap<>(data.kitCooldowns());
         });
     }
 

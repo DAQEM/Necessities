@@ -1,6 +1,7 @@
 package com.daqem.necessities.config;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.yamlconfig.YamlConfigExpectPlatform;
 import com.daqem.yamlconfig.api.config.ConfigExtension;
 import com.daqem.yamlconfig.api.config.ConfigType;
 import com.daqem.yamlconfig.api.config.IConfigBuilder;
@@ -26,7 +27,13 @@ public class NecessitiesConfig {
     public static final IConfigEntry<Integer> rtpCooldown;
 
     static {
-        IConfigBuilder config = new ConfigBuilder(Necessities.MOD_ID, "necessities", ConfigExtension.YAML, ConfigType.COMMON);
+        IConfigBuilder config = new ConfigBuilder(
+                Necessities.MOD_ID,
+                "necessities",
+                ConfigExtension.YAML,
+                ConfigType.COMMON,
+                YamlConfigExpectPlatform.getConfigDirectory().resolve(Necessities.MOD_ID)
+        );
         config.push("general");
         prefix = config.defineString("prefix", "", 0, 64)
                 .withComments("The prefix of the mod.");
