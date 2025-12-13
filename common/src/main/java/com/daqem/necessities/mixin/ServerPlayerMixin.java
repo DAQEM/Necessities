@@ -103,6 +103,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Unique
     private boolean necessities$vanished = false;
 
+    @Unique
+    private long necessities$LastRTPTime = 0;
+
     @Override
     public UUID necessities$getUUID() {
         return this.getUUID();
@@ -502,6 +505,15 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Override
+    public long necessities$getLastRTPTime() {
+        return necessities$LastRTPTime;
+    }
+    @Override
+    public void necessities$setLastRTPTime(long time) {
+        necessities$LastRTPTime = time;
+    }
+
+    @Override
     public LevelData.RespawnData necessities$getNewRespawnData() {
         return new LevelData.RespawnData(
                 new GlobalPos(
@@ -523,6 +535,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             this.necessities$Nick = oldNecessitiesServerPlayer.necessities$getNick();
             this.necessities$hasGodMode = oldNecessitiesServerPlayer.necessities$hasGodMode();
             this.necessities$vanished = oldNecessitiesServerPlayer.necessities$isVanished();
+            this.necessities$LastRTPTime = oldNecessitiesServerPlayer.necessities$getLastRTPTime();
         }
     }
 
@@ -534,7 +547,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
                 this.necessities$acceptsTPARequests(),
                 this.necessities$getNonNullNick(),
                 this.necessities$hasGodMode(),
-                this.necessities$isVanished()
+                this.necessities$isVanished(),
+                this.necessities$getLastRTPTime()
         ));
     }
 
@@ -550,6 +564,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             }
             this.necessities$hasGodMode = data.hasGodMode();
             this.necessities$vanished = data.vanished();
+            this.necessities$LastRTPTime = data.lastRTPTime();
         });
     }
 

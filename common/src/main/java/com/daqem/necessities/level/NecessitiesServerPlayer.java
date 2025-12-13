@@ -64,6 +64,9 @@ public interface NecessitiesServerPlayer {
     void necessities$removeNick();
     void necessities$broadcastNickChange();
 
+    long necessities$getLastRTPTime();
+    void necessities$setLastRTPTime(long time);
+
     boolean necessities$isAFK();
     void necessities$setAFK(boolean afk);
 

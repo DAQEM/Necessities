@@ -11,7 +11,9 @@ public record ServerPlayerData(
         boolean acceptsTPARequests,
         String nick,
         boolean hasGodMode,
-        boolean vanished
+        boolean vanished,
+        long lastRTPTime
+
 ) {
     public static final Codec<ServerPlayerData> CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
@@ -20,7 +22,8 @@ public record ServerPlayerData(
                     Codec.BOOL.fieldOf("AcceptsTPARequests").forGetter(ServerPlayerData::acceptsTPARequests),
                     Codec.STRING.fieldOf("Nick").forGetter(ServerPlayerData::nick),
                     Codec.BOOL.fieldOf("GodMode").forGetter(ServerPlayerData::hasGodMode),
-                    Codec.BOOL.optionalFieldOf("Vanished", false).forGetter(ServerPlayerData::vanished)
+                    Codec.BOOL.optionalFieldOf("Vanished", false).forGetter(ServerPlayerData::vanished),
+                    Codec.LONG.fieldOf("LastRTPTime").forGetter(ServerPlayerData::lastRTPTime)
             ).apply(instance, ServerPlayerData::new)
     );
 }

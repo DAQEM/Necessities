@@ -21,6 +21,10 @@ public class NecessitiesConfig {
     public static final IConfigEntry<Boolean> allowBackOnDeath;
     public static final IConfigEntry<Integer> tpaTimeout;
 
+    public static final IConfigEntry<Integer> rtpMinRadius;
+    public static final IConfigEntry<Integer> rtpMaxRadius;
+    public static final IConfigEntry<Integer> rtpCooldown;
+
     static {
         IConfigBuilder config = new ConfigBuilder(Necessities.MOD_ID, "necessities", ConfigExtension.YAML, ConfigType.COMMON);
         config.push("general");
@@ -54,6 +58,15 @@ public class NecessitiesConfig {
                 .withComments("If true, players can use /back to return to their death location.");
         tpaTimeout = config.defineInteger("tpaTimeout", 60, 0, Integer.MAX_VALUE)
                 .withComments("The time in seconds a TPA request will be pending.");
+        config.pop();
+
+        config.push("rtp");
+        rtpMinRadius = config.defineInteger("minRadius", 200, 0, Integer.MAX_VALUE)
+                .withComments("The minimum radius for the RTP command.");
+        rtpMaxRadius = config.defineInteger("maxRadius", 5000, 0, Integer.MAX_VALUE)
+                .withComments("The maximum radius for the RTP command.");
+        rtpCooldown = config.defineInteger("cooldown", 60, 0, Integer.MAX_VALUE)
+                .withComments("The cooldown in seconds for the RTP command.");
         config.pop();
 
         config.pop();

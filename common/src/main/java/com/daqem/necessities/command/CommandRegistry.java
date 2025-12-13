@@ -5,6 +5,7 @@ import com.daqem.necessities.command.chat.ReplyCommand;
 import com.daqem.necessities.command.inventory.EnderChestCommand;
 import com.daqem.necessities.command.inventory.InvseeCommand;
 import com.daqem.necessities.command.player.*;
+import com.daqem.necessities.command.teleportation.level.RTPCommand;
 import com.daqem.necessities.command.teleportation.level.spawn.SetSpawnCommand;
 import com.daqem.necessities.command.teleportation.level.spawn.SpawnCommand;
 import com.daqem.necessities.command.teleportation.level.warp.DeleteWarpCommand;
@@ -32,6 +33,8 @@ public interface CommandRegistry {
 
     Command SPAWN = register(new SpawnCommand());
     Command SET_SPAWN = register(new SetSpawnCommand());
+
+    Command RTP = register(new RTPCommand());
 
     Command WARP = register(new WarpCommand());
     Command SET_WARP = register(new SetWarpCommand());

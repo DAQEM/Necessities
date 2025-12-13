@@ -68,6 +68,10 @@
   "necessities.commands.vanish.disabled": "Vanish mode disabled. You are now visible.",
   "necessities.commands.vanish.notify.enabled": "Vanish enabled for %s.",
   "necessities.commands.vanish.notify.disabled": "Vanish disabled for %s.",
+  "necessities.commands.rtp.searching": "Searching for a safe location...",
+  "necessities.commands.rtp.success": "Teleported to a random location at %s, %s, %s.",
+  "necessities.commands.rtp.failed": "Could not find a safe location. Please try again.",
+  "necessities.commands.rtp.cooldown": "You must wait %s seconds before using RTP again.",
   "yamlconfig.necessities": "Necessities",
   "yamlconfig.necessities.necessities": "Configuration",
   "yamlconfig.necessities.necessities.general": "General",
@@ -81,5 +85,9 @@
   "yamlconfig.necessities.necessities.commands.homes": "Homes",
   "yamlconfig.necessities.necessities.commands.homes.homesLimit": "Homes Limit",
   "yamlconfig.necessities.necessities.commands.tpa": "Teleport Requests (TPA)",
-  "yamlconfig.necessities.necessities.commands.tpa.tpaTimeout": "Request Timeout (seconds)"
+  "yamlconfig.necessities.necessities.commands.tpa.tpaTimeout": "Request Timeout (seconds)",
+  "yamlconfig.necessities.necessities.commands.rtp": "Random Teleport (RTP)",
+  "yamlconfig.necessities.necessities.commands.rtp.minRadius": "Minimum Radius",
+  "yamlconfig.necessities.necessities.commands.rtp.maxRadius": "Maximum Radius",
+  "yamlconfig.necessities.necessities.commands.rtp.cooldown": "Cooldown (seconds)"
 }
