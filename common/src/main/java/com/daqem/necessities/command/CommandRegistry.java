@@ -2,6 +2,8 @@ package com.daqem.necessities.command;
 
 import com.daqem.necessities.command.chat.BroadcastCommand;
 import com.daqem.necessities.command.chat.ReplyCommand;
+import com.daqem.necessities.command.inventory.EnderChestCommand;
+import com.daqem.necessities.command.inventory.InvseeCommand;
 import com.daqem.necessities.command.player.*;
 import com.daqem.necessities.command.teleportation.level.spawn.SetSpawnCommand;
 import com.daqem.necessities.command.teleportation.level.spawn.SpawnCommand;
@@ -65,6 +67,9 @@ public interface CommandRegistry {
     Command FEED = register(new FeedCommand());
 
     Command VANISH = register(new VanishCommand());
+
+    Command INVSEE = register(new InvseeCommand());
+    Command ENDER_CHEST = register(new EnderChestCommand());
 
     Command REPLY = register(new ReplyCommand());
     Command BROADCAST = register(new BroadcastCommand());
