@@ -40,6 +40,8 @@ dependencies {
 
     modRuntimeOnly "com.daqem.uilib:uilib-fabric:${project.ui_library_version}"
     modImplementation "com.daqem.yamlconfig:yamlconfig-fabric:${project.config_library_version}"
+
+    modCompileOnly "me.lucko:fabric-permissions-api:0.3.1"
 }
 
 processResources {

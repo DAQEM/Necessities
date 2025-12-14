@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -19,7 +20,7 @@ public class FlyCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("fly")
-                .requires(source -> source.hasPermission(2))
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.fly", 2))
                 .executes(context -> toggleFlight(context.getSource(), Collections.singleton(context.getSource().getPlayerOrException())))
                 .then(Commands.argument("targets", EntityArgument.players())
                         .executes(context -> toggleFlight(context.getSource(), EntityArgument.getPlayers(context, "targets"))))

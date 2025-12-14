@@ -3,6 +3,7 @@ package com.daqem.necessities.command.teleportation.level;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -27,6 +28,7 @@ public class RTPCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("rtp")
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.rtp", 0))
                 .executes(context -> rtp(context.getSource())));
     }
 
@@ -36,7 +38,7 @@ public class RTPCommand implements Command {
             return 0;
         }
 
-        if (!source.hasPermission(2)) {
+        if (!NecessitiesPermissions.check(source, "necessities.command.rtp.bypass_cooldown", 2)) {
             long lastRTP = serverPlayer.necessities$getLastRTPTime();
             long currentTime = System.currentTimeMillis();
             long cooldown = NecessitiesConfig.rtpCooldown.get() * 1000L;

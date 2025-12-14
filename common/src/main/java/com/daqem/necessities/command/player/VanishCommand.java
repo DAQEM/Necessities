@@ -1,5 +1,6 @@
 package com.daqem.necessities.command.player;
 
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
@@ -11,7 +12,7 @@ public class VanishCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("vanish")
-                .requires(source -> source.hasPermission(2))
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.vanish", 2))
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         serverPlayer.necessities$setVanished(!serverPlayer.necessities$isVanished());
@@ -22,7 +23,7 @@ public class VanishCommand implements Command {
                 })
         );
         dispatcher.register(Commands.literal("v")
-                .requires(source -> source.hasPermission(2))
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.vanish", 2))
                 .redirect(dispatcher.getRoot().getChild("vanish"))
         );
     }

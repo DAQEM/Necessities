@@ -1,6 +1,7 @@
 package com.daqem.necessities.command.chat;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
@@ -19,6 +20,7 @@ public class ReplyCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralCommandNode<CommandSourceStack> command = dispatcher.register(Commands.literal("reply")
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.reply", 0))
                 .then(Commands.argument("message", MessageArgument.message())
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
@@ -35,7 +37,9 @@ public class ReplyCommand implements Command {
                             return 0;
                         })));
 
-        dispatcher.register(Commands.literal("r").redirect(command));
+        dispatcher.register(Commands.literal("r")
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.reply", 0))
+                .redirect(command));
     }
 
     private static void sendMessage(ServerPlayer sender, ServerPlayer recipient, PlayerChatMessage playerChatMessage) {

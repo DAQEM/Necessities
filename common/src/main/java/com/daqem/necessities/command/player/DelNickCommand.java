@@ -1,5 +1,6 @@
 package com.daqem.necessities.command.player;
 
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
@@ -11,6 +12,7 @@ public class DelNickCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("delnick")
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.delnick", 0))
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         serverPlayer.necessities$removeNick();

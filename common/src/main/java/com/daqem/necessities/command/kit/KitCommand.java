@@ -1,6 +1,7 @@
 package com.daqem.necessities.command.kit;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.data.KitManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -25,6 +26,7 @@ public class KitCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("kit")
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.kit", 0))
                 .then(Commands.argument("kit", StringArgumentType.word())
                         .suggests((context, builder) -> {
                             Set<String> suggestions = new HashSet<>();
@@ -37,6 +39,7 @@ public class KitCommand implements Command {
                 .executes(this::listKits));
 
         dispatcher.register(Commands.literal("kits")
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.kit", 0))
                 .executes(this::listKits));
     }
 
@@ -81,7 +84,7 @@ public class KitCommand implements Command {
             long now = System.currentTimeMillis();
             long remainingMillis = cooldownMillis - (now - lastUsed);
 
-            if (remainingMillis > 0 && !context.getSource().hasPermission(2)) {
+            if (remainingMillis > 0 && !NecessitiesPermissions.check(context.getSource(), "necessities.command.kit.bypass_cooldown", 2)) {
                 String timeString = getDurationBreakdown(remainingMillis);
                 serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.kit.cooldown", Necessities.coloredFailure(timeString)));
                 return 0;
@@ -111,57 +114,38 @@ public class KitCommand implements Command {
     }
 
     public static String getDurationBreakdown(long millis) {
+        // ... same implementation as original ...
         if (millis <= 0) {
             return "0 " + Necessities.translatable("time.seconds").getString();
         }
-
         long seconds = millis / 1000;
         final long ONE_MINUTE = 60;
         final long ONE_HOUR = 3600;
         final long ONE_DAY = 86400;
         final long ONE_WEEK = 604800;
-        final long ONE_MONTH = 2592000; // 30 Days
-        final long ONE_YEAR = 31536000; // 365 Days
+        final long ONE_MONTH = 2592000;
+        final long ONE_YEAR = 31536000;
 
-        // Use a LinkedHashMap to maintain insertion order (Largest to Smallest)
         Map<String, Long> units = new LinkedHashMap<>();
-
-        long years = seconds / ONE_YEAR;
-        seconds %= ONE_YEAR;
+        long years = seconds / ONE_YEAR; seconds %= ONE_YEAR;
         if (years > 0) units.put(years == 1 ? "time.year" : "time.years", years);
-
-        long months = seconds / ONE_MONTH;
-        seconds %= ONE_MONTH;
+        long months = seconds / ONE_MONTH; seconds %= ONE_MONTH;
         if (months > 0) units.put(months == 1 ? "time.month" : "time.months", months);
-
-        long weeks = seconds / ONE_WEEK;
-        seconds %= ONE_WEEK;
+        long weeks = seconds / ONE_WEEK; seconds %= ONE_WEEK;
         if (weeks > 0) units.put(weeks == 1 ? "time.week" : "time.weeks", weeks);
-
-        long days = seconds / ONE_DAY;
-        seconds %= ONE_DAY;
+        long days = seconds / ONE_DAY; seconds %= ONE_DAY;
         if (days > 0) units.put(days == 1 ? "time.day" : "time.days", days);
-
-        long hours = seconds / ONE_HOUR;
-        seconds %= ONE_HOUR;
+        long hours = seconds / ONE_HOUR; seconds %= ONE_HOUR;
         if (hours > 0) units.put(hours == 1 ? "time.hour" : "time.hours", hours);
-
-        long minutes = seconds / ONE_MINUTE;
-        seconds %= ONE_MINUTE;
+        long minutes = seconds / ONE_MINUTE; seconds %= ONE_MINUTE;
         if (minutes > 0) units.put(minutes == 1 ? "time.minute" : "time.minutes", minutes);
-
         if (seconds > 0) units.put(seconds == 1 ? "time.second" : "time.seconds", seconds);
 
-        // Build the result string
         List<String> parts = new ArrayList<>();
         for (Map.Entry<String, Long> entry : units.entrySet()) {
             parts.add(entry.getValue() + " " + Necessities.translatable(entry.getKey()).getString());
         }
-
-        if (parts.isEmpty()) {
-            return "0 " + Necessities.translatable("time.seconds").getString();
-        }
-
+        if (parts.isEmpty()) return "0 " + Necessities.translatable("time.seconds").getString();
         return String.join(", ", parts);
     }
 }

@@ -1,5 +1,6 @@
 package com.daqem.necessities.command.time;
 
+import com.daqem.necessities.NecessitiesPermissions;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -10,7 +11,7 @@ public class MidnightCommand extends TimeCommand {
 
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(TYPE)
-            .requires(source -> source.hasPermission(2))
-            .executes(context -> setTime(context.getSource(), TYPE, 18000)));
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.time.midnight", 2))
+                .executes(context -> setTime(context.getSource(), TYPE, 18000)));
     }
 }

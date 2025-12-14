@@ -1,6 +1,7 @@
 package com.daqem.necessities.command.player;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
@@ -28,7 +29,7 @@ public class GamemodeCommand implements Command {
 
     private static void register(CommandDispatcher<CommandSourceStack> dispatcher, String name) {
         dispatcher.register(Commands.literal(name)
-                .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.gamemode", 2))
                 .then(Commands.argument("gamemode", GameModeArgument.gameMode())
                         .executes(commandContext -> setMode(
                                         commandContext, Collections.singleton(commandContext.getSource().getPlayerOrException()),

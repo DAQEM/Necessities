@@ -1,5 +1,6 @@
 package com.daqem.necessities.command.inventory;
 
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.inventory.InvseeContainer;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -16,15 +17,11 @@ public class InvseeCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("invsee")
-                .requires(source -> source.hasPermission(2))
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.invsee", 2))
                 .then(Commands.argument("target", EntityArgument.player())
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer viewer) {
                                 ServerPlayer target = EntityArgument.getPlayer(context, "target");
-                                if (target == viewer) {
-                                    // Viewing self is possible, but usually restricted to prevent glitches or just pointless
-                                }
-
                                 InvseeContainer container = new InvseeContainer(target.getInventory());
 
                                 ((ServerPlayer) viewer).openMenu(new SimpleMenuProvider(

@@ -1,6 +1,7 @@
 package com.daqem.necessities.command.teleportation.level.warp;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.NecessitiesCommandSourceStack;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -17,6 +18,7 @@ public class DeleteWarpCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("delwarp")
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.delwarp", 2))
                 .then(Commands.argument("warp", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {

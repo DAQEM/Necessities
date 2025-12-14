@@ -1,5 +1,6 @@
 package com.daqem.necessities.command.inventory;
 
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
@@ -15,27 +16,24 @@ public class EnderChestCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        // /enderchest or /ec - Opens own Ender Chest
         dispatcher.register(Commands.literal("enderchest")
-                .requires(source -> source.hasPermission(0)) // Allow everyone usually, or restrict if needed
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest", 0))
                 .executes(context -> openEnderChest(context.getSource(), context.getSource().getPlayerOrException()))
                 .then(Commands.argument("target", EntityArgument.player())
-                        .requires(source -> source.hasPermission(2)) // Admin only for viewing others
+                        .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest.others", 2))
                         .executes(context -> openEnderChest(context.getSource(), EntityArgument.getPlayer(context, "target")))
                 ));
 
-        // Alias /ec
         dispatcher.register(Commands.literal("ec")
-                .requires(source -> source.hasPermission(0))
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest", 0))
                 .executes(context -> openEnderChest(context.getSource(), context.getSource().getPlayerOrException()))
                 .then(Commands.argument("target", EntityArgument.player())
-                        .requires(source -> source.hasPermission(2))
+                        .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest.others", 2))
                         .executes(context -> openEnderChest(context.getSource(), EntityArgument.getPlayer(context, "target")))
                 ));
 
-        // Alias /ecsee <player>
         dispatcher.register(Commands.literal("ecsee")
-                .requires(source -> source.hasPermission(2))
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest.others", 2))
                 .then(Commands.argument("target", EntityArgument.player())
                         .executes(context -> openEnderChest(context.getSource(), EntityArgument.getPlayer(context, "target")))
                 ));

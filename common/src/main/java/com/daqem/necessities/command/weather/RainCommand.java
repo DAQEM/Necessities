@@ -1,5 +1,6 @@
 package com.daqem.necessities.command.weather;
 
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
@@ -11,7 +12,7 @@ public class RainCommand extends WeatherCommand {
 
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(TYPE)
-                .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.weather.rain", 2))
                 .executes(context -> setWeather(context.getSource(), TYPE, 0, NecessitiesConfig.rainyTime.get(), true, false)));
     }
 }
