@@ -97,4 +97,7 @@ public interface NecessitiesServerPlayer {
     void necessities$setKitCooldowns(Map<ResourceLocation, Long> cooldowns);
     long necessities$getKitCooldown(ResourceLocation kitId);
     void necessities$setKitCooldown(ResourceLocation kitId, long timestamp);
+
+    int necessities$getHomeLimit();
+    int necessities$getMaxNickLength();
 }

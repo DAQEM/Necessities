@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import net.minecraft.commands.CommandSourceStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -19,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.exception.HomeLimitReachedException;
 import com.daqem.necessities.level.NecessitiesServerLevel;
@@ -84,6 +86,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Shadow
     public abstract ServerLevel level();
+
+    @Shadow public abstract CommandSourceStack createCommandSourceStack();
 
     @Unique
     private Map<String, Home> necessities$Homes = new HashMap<>();
@@ -274,9 +278,35 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Override
+    public int necessities$getHomeLimit() {
+        if (NecessitiesPermissions.check(this.createCommandSourceStack(), "necessities.home.limit.unlimited", 4)) {
+            return -1;
+        }
+        for (int i = 50; i >= 1; i--) {
+            if (NecessitiesPermissions.check(this.createCommandSourceStack(), "necessities.home.limit." + i, 4)) {
+                return i;
+            }
+        }
+        return NecessitiesConfig.homesLimit.get();
+    }
+
+    @Override
+    public int necessities$getMaxNickLength() {
+        if (NecessitiesPermissions.check(this.createCommandSourceStack(), "necessities.nick.length.unlimited", 4)) {
+            return 256;
+        }
+        for (int i = 32; i >= 1; i--) {
+            if (NecessitiesPermissions.check(this.createCommandSourceStack(), "necessities.nick.length." + i, 4)) {
+                return i;
+            }
+        }
+        return NecessitiesConfig.maxNickLength.get();
+    }
+
+    @Override
     public void necessities$addHome(Home home) throws HomeLimitReachedException {
-        Integer homesLimit = NecessitiesConfig.homesLimit.get();
-        if (homesLimit > 0 && necessities$Homes.size() >= homesLimit) {
+        int homesLimit = necessities$getHomeLimit();
+        if (homesLimit >= 0 && necessities$Homes.size() >= homesLimit) {
             if (!necessities$Homes.containsKey(home.name)) {
                 throw new HomeLimitReachedException();
             }

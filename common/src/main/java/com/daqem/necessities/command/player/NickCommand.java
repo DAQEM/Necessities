@@ -22,7 +22,7 @@ public class NickCommand implements Command {
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                                 String nickname = StringArgumentType.getString(context, "nickname");
-                                int maxLength = NecessitiesConfig.maxNickLength.get();
+                                int maxLength = serverPlayer.necessities$getMaxNickLength();
                                 if (nickname.length() > maxLength) {
                                     serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.nick.too_long", maxLength));
                                     return 0;
