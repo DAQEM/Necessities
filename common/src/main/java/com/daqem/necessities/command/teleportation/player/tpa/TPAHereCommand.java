@@ -1,7 +1,9 @@
 package com.daqem.necessities.command.teleportation.player.tpa;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
@@ -16,7 +18,8 @@ public class TPAHereCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("tpahere")
+        CommandManager.register(dispatcher, "tpahere", literal -> literal
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.tpahere", 0))
                 .then(Commands.argument("player", StringArgumentType.string())
                         .suggests((context, builder) ->
                                 SharedSuggestionProvider.suggest(

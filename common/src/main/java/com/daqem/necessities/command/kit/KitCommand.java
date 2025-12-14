@@ -1,8 +1,16 @@
 package com.daqem.necessities.command.kit;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.data.KitManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.model.Kit;
@@ -10,6 +18,8 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -19,27 +29,23 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.*;
-
 public class KitCommand implements Command {
+
+    private static final SuggestionProvider<CommandSourceStack> SUGGEST_KITS = (context, builder) -> {
+        Set<String> suggestions = new HashSet<>();
+        for (Kit kit : KitManager.getInstance().getKits()) {
+            suggestions.add(kit.getId().getPath());
+        }
+        return SharedSuggestionProvider.suggest(suggestions, builder);
+    };
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("kit")
+        CommandManager.register(dispatcher, "kit", literal -> literal
                 .requires(source -> NecessitiesPermissions.check(source, "necessities.command.kit", 0))
-                .then(Commands.argument("kit", StringArgumentType.word())
-                        .suggests((context, builder) -> {
-                            Set<String> suggestions = new HashSet<>();
-                            for (Kit kit : KitManager.getInstance().getKits()) {
-                                suggestions.add(kit.getId().getPath());
-                            }
-                            return SharedSuggestionProvider.suggest(suggestions, builder);
-                        })
+                .then(Commands.argument("kit", StringArgumentType.string())
+                        .suggests(SUGGEST_KITS)
                         .executes(context -> giveKit(context, StringArgumentType.getString(context, "kit"))))
-                .executes(this::listKits));
-
-        dispatcher.register(Commands.literal("kits")
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.kit", 0))
                 .executes(this::listKits));
     }
 
@@ -114,7 +120,6 @@ public class KitCommand implements Command {
     }
 
     public static String getDurationBreakdown(long millis) {
-        // ... same implementation as original ...
         if (millis <= 0) {
             return "0 " + Necessities.translatable("time.seconds").getString();
         }

@@ -3,9 +3,10 @@ package com.daqem.necessities.command.chat;
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
@@ -19,27 +20,26 @@ public class ReplyCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralCommandNode<CommandSourceStack> command = dispatcher.register(Commands.literal("reply")
+        CommandManager.register(dispatcher, "reply", literal -> literal
                 .requires(source -> NecessitiesPermissions.check(source, "necessities.command.reply", 0))
                 .then(Commands.argument("message", MessageArgument.message())
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                                 if (serverPlayer.necessities$getLastMessageSender().isPresent()) {
                                     NecessitiesServerPlayer recipient = serverPlayer.necessities$getLastMessageSender().get();
-                                    MessageArgument.resolveChatMessage(context, "message", playerChatMessage ->
-                                            sendMessage((ServerPlayer) serverPlayer, (ServerPlayer) recipient, playerChatMessage));
+                                    MessageArgument.resolveChatMessage(context, "message", playerChatMessage -> {
+                                            sendMessage((ServerPlayer) serverPlayer, (ServerPlayer) recipient, playerChatMessage);
+                                            recipient.necessities$setLastMessageSender(serverPlayer.necessities$getUUID());
+                                    });
                                     return 1;
+                                } else {
+                                    serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.reply.no_last_sender"));
+                                    return 0;
                                 }
-                                serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.reply.no_last_sender"));
-                                return 0;
                             }
                             context.getSource().sendFailure(NEEDS_PLAYER_ERROR);
                             return 0;
                         })));
-
-        dispatcher.register(Commands.literal("r")
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.reply", 0))
-                .redirect(command));
     }
 
     private static void sendMessage(ServerPlayer sender, ServerPlayer recipient, PlayerChatMessage playerChatMessage) {

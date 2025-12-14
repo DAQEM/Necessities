@@ -3,19 +3,19 @@ package com.daqem.necessities.command.teleportation.level.warp;
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
-import com.daqem.necessities.command.NecessitiesCommandSourceStack;
-import com.daqem.necessities.level.NecessitiesServerLevel;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.model.Warp;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 
 public class SetWarpCommand implements Command {
 
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("setwarp")
+        CommandManager.register(dispatcher, "setwarp", literal -> literal
                 .requires(source -> NecessitiesPermissions.check(source, "necessities.command.setwarp", 2))
                 .then(Commands.argument("name", StringArgumentType.string())
                         .executes(context -> {

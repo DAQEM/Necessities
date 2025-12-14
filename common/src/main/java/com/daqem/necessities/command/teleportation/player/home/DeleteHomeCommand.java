@@ -1,22 +1,26 @@
 package com.daqem.necessities.command.teleportation.player.home;
 
+import java.util.ArrayList;
+
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.model.Home;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-
-import java.util.ArrayList;
 
 public class DeleteHomeCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("delhome")
+         CommandManager.register(dispatcher, "delhome", literal -> literal
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.delhome", 0))
                 .then(Commands.argument("home", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {

@@ -141,5 +141,6 @@ public class NecessitiesConfig {
     }
 
     public static void init() {
+        CommandConfig.init();
     }
 }

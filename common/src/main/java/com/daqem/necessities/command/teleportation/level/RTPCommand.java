@@ -5,13 +5,13 @@ import java.util.concurrent.ThreadLocalRandom;
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.model.Position;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
@@ -27,7 +27,7 @@ public class RTPCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("rtp")
+         CommandManager.register(dispatcher, "rtp", literal -> literal
                 .requires(source -> NecessitiesPermissions.check(source, "necessities.command.rtp", 0))
                 .executes(context -> rtp(context.getSource())));
     }

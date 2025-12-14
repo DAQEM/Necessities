@@ -3,10 +3,11 @@ package com.daqem.necessities.command.chat;
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.utils.ChatFormatter;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.MessageArgument;
@@ -16,7 +17,7 @@ public class BroadcastCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralCommandNode<CommandSourceStack> command = dispatcher.register(Commands.literal("broadcast")
+         CommandManager.register(dispatcher, "broadcast", literal -> literal
                 .requires(source -> NecessitiesPermissions.check(source, "necessities.command.broadcast", 2))
                 .then(Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
                     MessageArgument.resolveChatMessage(commandContext, "message", playerChatMessage -> {
@@ -29,9 +30,5 @@ public class BroadcastCommand implements Command {
                     return 1;
                 }))
         );
-
-        dispatcher.register(Commands.literal("bc")
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.broadcast", 2))
-                .redirect(command));
     }
 }

@@ -1,7 +1,9 @@
 package com.daqem.necessities.command.player;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
@@ -16,8 +18,8 @@ public class GodCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("god")
-                .requires(source -> source.hasPermission(2))
+        CommandManager.register(dispatcher, "god", literal -> literal
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.god", 2))
                 .then(Commands.argument("player", StringArgumentType.string())
                         .suggests((context, builder) ->
                                 SharedSuggestionProvider.suggest(

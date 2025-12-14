@@ -1,22 +1,25 @@
 package com.daqem.necessities.command.teleportation.player.home;
 
+import java.util.List;
+
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.exception.HomeLimitReachedException;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.model.Home;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SetHomeCommand implements Command {
 
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("sethome")
+         CommandManager.register(dispatcher, "sethome", literal -> literal
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.sethome", 0))
                 .then(Commands.argument("name", StringArgumentType.string())
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {

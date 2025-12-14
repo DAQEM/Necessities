@@ -2,8 +2,10 @@ package com.daqem.necessities.command.inventory;
 
 import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -16,27 +18,12 @@ public class EnderChestCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("enderchest")
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest", 0))
+         CommandManager.register(dispatcher, "enderchest", literal -> literal
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest", 2))
                 .executes(context -> openEnderChest(context.getSource(), context.getSource().getPlayerOrException()))
                 .then(Commands.argument("target", EntityArgument.player())
                         .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest.others", 2))
-                        .executes(context -> openEnderChest(context.getSource(), EntityArgument.getPlayer(context, "target")))
-                ));
-
-        dispatcher.register(Commands.literal("ec")
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest", 0))
-                .executes(context -> openEnderChest(context.getSource(), context.getSource().getPlayerOrException()))
-                .then(Commands.argument("target", EntityArgument.player())
-                        .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest.others", 2))
-                        .executes(context -> openEnderChest(context.getSource(), EntityArgument.getPlayer(context, "target")))
-                ));
-
-        dispatcher.register(Commands.literal("ecsee")
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest.others", 2))
-                .then(Commands.argument("target", EntityArgument.player())
-                        .executes(context -> openEnderChest(context.getSource(), EntityArgument.getPlayer(context, "target")))
-                ));
+                        .executes(context -> openEnderChest(context.getSource(), EntityArgument.getPlayer(context, "target")))));
     }
 
     private int openEnderChest(CommandSourceStack source, ServerPlayer target) {

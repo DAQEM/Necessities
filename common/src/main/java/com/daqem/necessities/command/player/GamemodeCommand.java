@@ -1,12 +1,16 @@
 package com.daqem.necessities.command.player;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -16,35 +20,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 
-import java.util.Collection;
-import java.util.Collections;
-
 public class GamemodeCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        register(dispatcher, "gamemode");
-        register(dispatcher, "gm");
-    }
-
-    private static void register(CommandDispatcher<CommandSourceStack> dispatcher, String name) {
-        dispatcher.register(Commands.literal(name)
+         CommandManager.register(dispatcher, "gamemode", literal -> literal
                 .requires(source -> NecessitiesPermissions.check(source, "necessities.command.gamemode", 2))
                 .then(Commands.argument("gamemode", GameModeArgument.gameMode())
-                        .executes(commandContext -> setMode(
-                                        commandContext, Collections.singleton(commandContext.getSource().getPlayerOrException()),
-                                        GameModeArgument.getGameMode(commandContext, "gamemode")
-                                )
-                        )
+                        .executes(context -> setMode(context, Collections.singleton(context.getSource().getPlayerOrException()), GameModeArgument.getGameMode(context, "gamemode")))
                         .then(Commands.argument("target", EntityArgument.players())
-                                .executes(commandContext -> setMode(
-                                                commandContext, EntityArgument.getPlayers(commandContext, "target"),
-                                                GameModeArgument.getGameMode(commandContext, "gamemode")
-                                        )
-                                )
-                        )
-                )
-        );
+                                .executes(context -> setMode(context, EntityArgument.getPlayers(context, "target"), GameModeArgument.getGameMode(context, "gamemode"))))));
     }
 
     private static void logGamemodeChange(CommandSourceStack commandSourceStack, ServerPlayer serverPlayer, GameType gameType) {

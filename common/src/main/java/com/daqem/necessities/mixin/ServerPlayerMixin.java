@@ -549,7 +549,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
                     player.sendSystemMessage(Necessities.prefixedTranslatable("commands.vanish.notify.enabled", this.getDisplayName()).withStyle(ChatFormatting.GRAY));
                 }
             }
-            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.vanish.enabled"), true);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.vanish.enabled"), false);
         } else {
             ClientboundPlayerInfoUpdatePacket addPacket = ClientboundPlayerInfoUpdatePacket.createPlayerInitializing(List.of((ServerPlayer) (Object) this));
             Component joinMessage = Component.translatable("multiplayer.player.joined", this.getDisplayName()).withStyle(ChatFormatting.YELLOW);
@@ -570,7 +570,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             this.level().getChunkSource().removeEntity(this);
             this.level().getChunkSource().addEntity(this);
 
-            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.vanish.disabled"), true);
+            this.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.vanish.disabled"), false);
         }
     }
 

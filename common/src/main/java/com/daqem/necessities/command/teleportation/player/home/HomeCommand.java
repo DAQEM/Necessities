@@ -3,7 +3,9 @@ package com.daqem.necessities.command.teleportation.player.home;
 import java.util.ArrayList;
 
 import com.daqem.necessities.Necessities;
+import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
+import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
@@ -16,7 +18,8 @@ import net.minecraft.commands.SharedSuggestionProvider;
 public class HomeCommand implements Command {
 
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("home")
+         CommandManager.register(dispatcher, "home", literal -> literal
+                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.home", 0))
                 .then(Commands.argument("home", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
