@@ -1,5 +1,5 @@
 loom {
-    accessWidenerPath = project(':common').file("src/main/resources/necessities.accessWidener")
+    accessWidenerPath = project(':common').file("src/main/resources/necessities.accesswidener")
 }
 
 dependencies {
