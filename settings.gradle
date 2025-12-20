@@ -15,4 +15,4 @@ include("testmod-common")
 include("testmod-fabric")
 include("testmod-neoforge")
 
-rootProject.name = "Necessities 1.21.9"
+rootProject.name = "Necessities 1.21.11"

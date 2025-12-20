@@ -25,7 +25,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -84,7 +84,7 @@ public class KitCommand implements Command {
                 return 0;
             }
 
-            ResourceLocation kitId = kit.getId();
+            Identifier kitId = kit.getId();
             long cooldownMillis = kit.getCooldown() * 1000L;
             long lastUsed = serverPlayer.necessities$getKitCooldown(kitId);
             long now = System.currentTimeMillis();

@@ -92,7 +92,7 @@ public class RTPCommand implements Command {
                             z + 0.5,
                             serverPlayer.necessities$getPosition().yaw,
                             serverPlayer.necessities$getPosition().pitch,
-                            level.dimension().location()
+                            level.dimension().identifier()
                     ), delay, null, 0, (player) -> {
                         player.necessities$sendSystemMessage(Necessities.prefixedTranslatable("commands.rtp.success", x, y, z), false);
                         player.necessities$setLastRTPTime(System.currentTimeMillis());

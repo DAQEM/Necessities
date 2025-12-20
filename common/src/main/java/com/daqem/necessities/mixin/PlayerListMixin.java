@@ -7,6 +7,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -38,7 +39,7 @@ public class PlayerListMixin {
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket;createPlayerInitializing(Ljava/util/Collection;)Lnet/minecraft/network/protocol/game/ClientboundPlayerInfoUpdatePacket;"))
     public ClientboundPlayerInfoUpdatePacket redirectCreatePlayerInitializing(Collection<ServerPlayer> players) {
         ServerPlayer joining = necessities$joiningPlayer.get();
-        if (joining != null && !joining.hasPermissions(2)) {
+        if (joining != null && !joining.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
             List<ServerPlayer> filtered = new ArrayList<>();
             for (ServerPlayer p : players) {
                 if (p instanceof NecessitiesServerPlayer nsp && nsp.necessities$isVanished()) {
@@ -55,7 +56,7 @@ public class PlayerListMixin {
     public void redirectBroadcastSystemMessage(PlayerList instance, Component component, boolean bl, Connection connection, ServerPlayer player, CommonListenerCookie cookie) {
         if (player instanceof NecessitiesServerPlayer serverPlayer && serverPlayer.necessities$isVanished()) {
             for (ServerPlayer p : instance.getPlayers()) {
-                if (p.hasPermissions(2)) {
+                if (p.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
                     p.sendSystemMessage(component);
                 }
             }
@@ -69,7 +70,7 @@ public class PlayerListMixin {
         if (player instanceof NecessitiesServerPlayer serverPlayer && serverPlayer.necessities$isVanished()) {
             if (packet instanceof ClientboundPlayerInfoUpdatePacket) {
                 for (ServerPlayer p : instance.getPlayers()) {
-                    if (p.hasPermissions(2)) {
+                    if (p.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
                         p.connection.send(packet);
                     }
                 }

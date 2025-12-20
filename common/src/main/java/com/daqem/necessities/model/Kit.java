@@ -2,14 +2,14 @@ package com.daqem.necessities.model;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
 public class Kit {
 
-    private final ResourceLocation id;
+    private final Identifier id;
     private final List<ItemStack> items;
     private final long cooldown;
 
@@ -18,13 +18,13 @@ public class Kit {
             Codec.LONG.optionalFieldOf("cooldown", 0L).forGetter(Kit::getCooldown)
     ).apply(instance, (items, cooldown) -> new Kit(null, items, cooldown)));
 
-    public Kit(ResourceLocation id, List<ItemStack> items, long cooldown) {
+    public Kit(Identifier id, List<ItemStack> items, long cooldown) {
         this.id = id;
         this.items = items;
         this.cooldown = cooldown;
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return id;
     }
 
@@ -36,7 +36,7 @@ public class Kit {
         return cooldown;
     }
 
-    public Kit withId(ResourceLocation id) {
+    public Kit withId(Identifier id) {
         return new Kit(id, this.items, this.cooldown);
     }
 }

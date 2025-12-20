@@ -7,7 +7,7 @@ import java.util.Map;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public record ServerPlayerData(
         List<Home> homes,
@@ -17,7 +17,7 @@ public record ServerPlayerData(
         boolean hasGodMode,
         boolean vanished,
         long lastRTPTime,
-        Map<ResourceLocation, Long> kitCooldowns,
+        Map<Identifier, Long> kitCooldowns,
         Map<String, Long> teleportCooldowns
 
 ) {
@@ -30,7 +30,7 @@ public record ServerPlayerData(
                     Codec.BOOL.fieldOf("GodMode").forGetter(ServerPlayerData::hasGodMode),
                     Codec.BOOL.optionalFieldOf("Vanished", false).forGetter(ServerPlayerData::vanished),
                     Codec.LONG.fieldOf("LastRTPTime").forGetter(ServerPlayerData::lastRTPTime),
-                    Codec.unboundedMap(ResourceLocation.CODEC, Codec.LONG).optionalFieldOf("KitCooldowns", new HashMap<>()).forGetter(ServerPlayerData::kitCooldowns),
+                    Codec.unboundedMap(Identifier.CODEC, Codec.LONG).optionalFieldOf("KitCooldowns", new HashMap<>()).forGetter(ServerPlayerData::kitCooldowns),
                     Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("TeleportCooldowns", new HashMap<>()).forGetter(ServerPlayerData::teleportCooldowns)
             ).apply(instance, ServerPlayerData::new)
     );

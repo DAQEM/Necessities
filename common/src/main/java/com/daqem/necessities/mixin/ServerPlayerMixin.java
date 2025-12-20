@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.Permissions;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -46,7 +47,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -126,7 +127,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     private long necessities$LastRTPTime = 0;
 
     @Unique
-    private Map<ResourceLocation, Long> necessities$KitCooldowns = new HashMap<>();
+    private Map<Identifier, Long> necessities$KitCooldowns = new HashMap<>();
 
     @Override
     public UUID necessities$getUUID() {
@@ -189,7 +190,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Override
-    public ServerLevel necessities$getLevel(ResourceLocation dimension) {
+    public ServerLevel necessities$getLevel(Identifier dimension) {
         return this.level().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, dimension));
     }
 
@@ -571,7 +572,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 if (player == (Object) this) continue;
 
-                if (!player.hasPermissions(2)) {
+                if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
                     player.connection.send(removePacket);
                     player.connection.send(removeEntitiesPacket);
                     player.sendSystemMessage(leftMessage);
@@ -587,7 +588,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 if (player == (Object) this) continue;
 
-                if (!player.hasPermissions(2)) {
+                if (!player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
                     // Send tab list packet BEFORE spawning the entity
                     player.connection.send(addPacket);
                     player.sendSystemMessage(joinMessage);
@@ -626,22 +627,22 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Override
-    public Map<ResourceLocation, Long> necessities$getKitCooldowns() {
+    public Map<Identifier, Long> necessities$getKitCooldowns() {
         return necessities$KitCooldowns;
     }
 
     @Override
-    public void necessities$setKitCooldowns(Map<ResourceLocation, Long> cooldowns) {
+    public void necessities$setKitCooldowns(Map<Identifier, Long> cooldowns) {
         this.necessities$KitCooldowns = cooldowns;
     }
 
     @Override
-    public long necessities$getKitCooldown(ResourceLocation kitId) {
+    public long necessities$getKitCooldown(Identifier kitId) {
         return necessities$KitCooldowns.getOrDefault(kitId, 0L);
     }
 
     @Override
-    public void necessities$setKitCooldown(ResourceLocation kitId, long timestamp) {
+    public void necessities$setKitCooldown(Identifier kitId, long timestamp) {
         necessities$KitCooldowns.put(kitId, timestamp);
     }
 

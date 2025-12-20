@@ -17,7 +17,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.GameModeArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 
 public class GamemodeCommand implements Command {
@@ -41,7 +41,7 @@ public class GamemodeCommand implements Command {
                 commandSourceStack.sendSuccess(() -> Necessities.prefixedVanillaTranslatable("commands.gamemode.success.self", component), true);
             }
         } else {
-            if (commandSourceStack.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
+            if (commandSourceStack.getLevel().getGameRules().get(GameRules.SEND_COMMAND_FEEDBACK)) {
                 if (serverPlayer instanceof NecessitiesServerPlayer necessitiesServerPlayer) {
                     necessitiesServerPlayer.necessities$sendSystemMessage(Necessities.prefixedVanillaTranslatable("gameMode.changed", component), false);
                 } else {

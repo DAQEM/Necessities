@@ -13,7 +13,7 @@ import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.registry.registries.RegistrarManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import org.slf4j.Logger;
 
@@ -36,8 +36,8 @@ public class Necessities {
         PlayerDeathEvent.registerEvent();
     }
 
-    public static ResourceLocation getId(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier getId(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     public static MutableComponent prefixedTranslatable(String str) {

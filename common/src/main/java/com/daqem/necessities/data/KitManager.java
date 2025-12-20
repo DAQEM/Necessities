@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.mojang.serialization.JsonOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
 
-    private ImmutableMap<ResourceLocation, Kit> kits = ImmutableMap.of();
+    private ImmutableMap<Identifier, Kit> kits = ImmutableMap.of();
 
     private static KitManager instance;
 
@@ -39,19 +39,19 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
     @Override
     protected @NotNull List<Kit> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         // 1. Load from Datapacks
-        Map<ResourceLocation, Resource> resourceMap = resourceManager.listResources("necessities/kits", (resourceLocation) ->
+        Map<Identifier, Resource> resourceMap = resourceManager.listResources("necessities/kits", (resourceLocation) ->
                         resourceLocation.getPath().endsWith(".json")).entrySet().stream()
                 .collect(Collectors.toMap(entry ->
-                                ResourceLocation.fromNamespaceAndPath(
+                                Identifier.fromNamespaceAndPath(
                                         entry.getKey().getNamespace(),
                                         entry.getKey().getPath()
                                                 .substring(0, entry.getKey().getPath().length() - ".json".length())
                                                 .substring("necessities/kits/".length())),
                         Map.Entry::getValue));
 
-        Map<ResourceLocation, JsonObject> map = new HashMap<>();
-        for (Map.Entry<ResourceLocation, Resource> entry : resourceMap.entrySet()) {
-            ResourceLocation location = entry.getKey();
+        Map<Identifier, JsonObject> map = new HashMap<>();
+        for (Map.Entry<Identifier, Resource> entry : resourceMap.entrySet()) {
+            Identifier location = entry.getKey();
             try {
                 JsonObject jsonElement = GsonHelper.parse(entry.getValue().openAsReader());
                 map.put(location, jsonElement);
@@ -83,7 +83,7 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
                                     namespace = Necessities.MOD_ID;
                                     resourcePath = relativePath;
                                 }
-                                ResourceLocation location = ResourceLocation.fromNamespaceAndPath(namespace, resourcePath);
+                                Identifier location = Identifier.fromNamespaceAndPath(namespace, resourcePath);
                                 // Config files override datapack files with the same ID
                                 map.put(location, jsonElement);
                             } catch (Exception e) {
@@ -98,8 +98,8 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
         // 3. Parse gathered JSON objects
         List<Kit> kits = new ArrayList<>();
 
-        for (Map.Entry<ResourceLocation, JsonObject> entry : map.entrySet()) {
-            ResourceLocation location = entry.getKey();
+        for (Map.Entry<Identifier, JsonObject> entry : map.entrySet()) {
+            Identifier location = entry.getKey();
             JsonObject jsonObject = entry.getValue();
 
             try {
@@ -135,7 +135,7 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
         return kits.values().asList();
     }
 
-    public Optional<Kit> getKit(ResourceLocation location) {
+    public Optional<Kit> getKit(Identifier location) {
         return Optional.ofNullable(kits.get(location));
     }
 }

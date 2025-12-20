@@ -13,7 +13,7 @@ import com.daqem.necessities.model.Position;
 import com.daqem.necessities.model.TPARequest;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.storage.LevelData;
 
@@ -30,7 +30,7 @@ public interface NecessitiesServerPlayer {
     void necessities$setNecessitiesInstalled(boolean installed);
 
     NecessitiesServerLevel necessities$getLevel();
-    ServerLevel necessities$getLevel(ResourceLocation dimension);
+    ServerLevel necessities$getLevel(Identifier dimension);
     NecessitiesServerLevel necessities$getOverworld();
 
     NecessitiesLevelData necessities$getLevelData();
@@ -93,10 +93,10 @@ public interface NecessitiesServerPlayer {
 
     LevelData.RespawnData necessities$getNewRespawnData();
 
-    Map<ResourceLocation, Long> necessities$getKitCooldowns();
-    void necessities$setKitCooldowns(Map<ResourceLocation, Long> cooldowns);
-    long necessities$getKitCooldown(ResourceLocation kitId);
-    void necessities$setKitCooldown(ResourceLocation kitId, long timestamp);
+    Map<Identifier, Long> necessities$getKitCooldowns();
+    void necessities$setKitCooldowns(Map<Identifier, Long> cooldowns);
+    long necessities$getKitCooldown(Identifier kitId);
+    void necessities$setKitCooldown(Identifier kitId, long timestamp);
 
     int necessities$getHomeLimit();
     int necessities$getMaxNickLength();

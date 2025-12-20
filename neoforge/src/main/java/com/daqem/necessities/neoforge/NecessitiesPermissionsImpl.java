@@ -2,6 +2,8 @@ package com.daqem.necessities.neoforge;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.neoforged.neoforge.server.permission.PermissionAPI;
 import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
 import net.neoforged.neoforge.server.permission.nodes.PermissionTypes;
@@ -27,10 +29,10 @@ public class NecessitiesPermissionsImpl {
             try {
                 return PermissionAPI.getPermission(player, node);
             } catch (Exception e) {
-                return source.hasPermission(fallbackLevel);
+                return source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(fallbackLevel)));
             }
         }
 
-        return source.hasPermission(fallbackLevel);
+        return source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(fallbackLevel)));
     }
 }

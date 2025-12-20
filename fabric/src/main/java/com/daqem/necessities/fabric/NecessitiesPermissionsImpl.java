@@ -2,6 +2,8 @@ package com.daqem.necessities.fabric;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 
 public class NecessitiesPermissionsImpl {
 
@@ -13,9 +15,9 @@ public class NecessitiesPermissionsImpl {
                 return me.lucko.fabric.api.permissions.v0.Permissions.check(source, permissionNode, fallbackLevel);
             } catch (Throwable t) {
                 // Fallback if something goes wrong with the API
-                return source.hasPermission(fallbackLevel);
+                return source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(fallbackLevel)));
             }
         }
-        return source.hasPermission(fallbackLevel);
+        return source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(fallbackLevel)));
     }
 }
