@@ -21,4 +21,6 @@ dependencies {
     modApi "dev.architectury:architectury-fabric:${project.architectury_version}"
     modRuntimeOnly "com.daqem.uilib:uilib-fabric:${project.uilib_version}"
     modImplementation "com.daqem.yamlconfig:yamlconfig-fabric:${project.yamlconfig_version}"
+
+    modCompileOnly "me.lucko:fabric-permissions-api:0.3.1"
 }
