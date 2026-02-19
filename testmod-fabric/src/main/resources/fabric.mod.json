@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "necessities_test",
-  "version": "${version}",
+  "version": "1.0.0",
   "name": "Necessities Test Mod",
   "description": "A test mod for Necessities.",
   "authors": [
