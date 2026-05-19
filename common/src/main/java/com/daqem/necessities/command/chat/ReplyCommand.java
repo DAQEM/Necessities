@@ -24,8 +24,10 @@ public class ReplyCommand implements Command {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                                 if (serverPlayer.necessities$getLastMessageSender().isPresent()) {
                                     NecessitiesServerPlayer recipient = serverPlayer.necessities$getLastMessageSender().get();
-                                    MessageArgument.resolveChatMessage(context, "message", playerChatMessage ->
-                                            sendMessage((ServerPlayer) serverPlayer, (ServerPlayer) recipient, playerChatMessage));
+                                    MessageArgument.resolveChatMessage(context, "message", playerChatMessage -> {
+                                        sendMessage((ServerPlayer) serverPlayer, (ServerPlayer) recipient, playerChatMessage);
+                                        recipient.necessities$setLastMessageSender(serverPlayer.necessities$getUUID());
+                                    });
                                     return 1;
                                 }
                                 serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.reply.no_last_sender"));
