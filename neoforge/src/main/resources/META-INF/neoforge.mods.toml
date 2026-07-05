@@ -27,11 +27,18 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies."${mod_id}"]]
-modId = "architectury"
+modId = "knot"
 mandatory = true
-versionRange = "[${architectury_version},)"
+versionRange = "[${knot_version},)"
 ordering = "AFTER"
 side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "uilib"
+mandatory = true
+versionRange = "[${uilib_version},)"
+ordering = "NONE"
+side = "CLIENT"
 
 [[dependencies."${mod_id}"]]
 modId = "yamlconfig"

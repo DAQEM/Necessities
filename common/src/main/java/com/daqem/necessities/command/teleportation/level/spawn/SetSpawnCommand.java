@@ -1,7 +1,6 @@
 package com.daqem.necessities.command.teleportation.level.spawn;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -13,7 +12,7 @@ public class SetSpawnCommand implements Command {
 
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         CommandManager.register(dispatcher, "setspawn", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.setspawn", 2))
+                .requires(source -> Necessities.API.hasPermission(source, "command.setspawn"))
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         serverPlayer.necessities$getLevelData().necessities$setSpawnPosition(serverPlayer.necessities$getPosition());

@@ -1,7 +1,6 @@
 package com.daqem.necessities.command.teleportation.player.back;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
@@ -9,13 +8,14 @@ import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.PermissionLevel;
 
 public class BackCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         CommandManager.register(dispatcher, "back", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.back", 0))
+                .requires(source -> Necessities.API.hasPermission(source, "command.back", PermissionLevel.ALL))
                 .executes(context -> {
                     if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {
                         if (serverPlayer.necessities$hasLastPosition()) {

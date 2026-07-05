@@ -1,6 +1,6 @@
 package com.daqem.necessities.command.weather;
 
-import com.daqem.necessities.NecessitiesPermissions;
+import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.mojang.brigadier.CommandDispatcher;
@@ -14,7 +14,7 @@ public class ThunderCommand extends WeatherCommand {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         CommandManager.register(dispatcher, TYPE, literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.weather.thunder", 2))
+                .requires(source -> Necessities.API.hasPermission(source, "command.weather.thunder"))
                 .executes(context -> setWeather(context.getSource(), TYPE, 0, NecessitiesConfig.thunderTime.get(), true, true)));
     }
 }

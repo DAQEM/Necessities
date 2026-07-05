@@ -1,6 +1,6 @@
 package com.daqem.necessities.command.inventory;
 
-import com.daqem.necessities.NecessitiesPermissions;
+import com.daqem.necessities.Necessities;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -19,10 +19,10 @@ public class EnderChestCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
          CommandManager.register(dispatcher, "enderchest", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest", 2))
+                .requires(source -> Necessities.API.hasPermission(source, "command.enderchest"))
                 .executes(context -> openEnderChest(context.getSource(), context.getSource().getPlayerOrException()))
                 .then(Commands.argument("target", EntityArgument.player())
-                        .requires(source -> NecessitiesPermissions.check(source, "necessities.command.enderchest.others", 2))
+                        .requires(source -> Necessities.API.hasPermission(source, "command.enderchest.others"))
                         .executes(context -> openEnderChest(context.getSource(), EntityArgument.getPlayer(context, "target")))));
     }
 

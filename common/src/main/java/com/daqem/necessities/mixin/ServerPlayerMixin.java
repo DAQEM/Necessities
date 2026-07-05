@@ -1,41 +1,18 @@
 package com.daqem.necessities.mixin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.permissions.Permissions;
-import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
+import com.daqem.knot.Knot;
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.config.NecessitiesConfig;
 import com.daqem.necessities.exception.HomeLimitReachedException;
 import com.daqem.necessities.level.NecessitiesServerLevel;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
 import com.daqem.necessities.level.storage.NecessitiesLevelData;
-import com.daqem.necessities.model.DelayedTeleport;
-import com.daqem.necessities.model.Home;
-import com.daqem.necessities.model.Position;
-import com.daqem.necessities.model.ServerPlayerData;
-import com.daqem.necessities.model.TPARequest;
+import com.daqem.necessities.model.*;
+import com.daqem.necessities.networking.clientbound.ClientboundPingPacket;
 import com.daqem.necessities.utils.ChatFormatter;
 import com.mojang.authlib.GameProfile;
-
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -46,11 +23,12 @@ import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
@@ -59,6 +37,17 @@ import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player implements NecessitiesServerPlayer {
@@ -88,7 +77,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     @Shadow
     public abstract ServerLevel level();
 
-    @Shadow public abstract CommandSourceStack createCommandSourceStack();
+    @Shadow
+    public abstract CommandSourceStack createCommandSourceStack();
 
     @Unique
     private Map<String, Home> necessities$Homes = new HashMap<>();
@@ -106,7 +96,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     private String necessities$Nick = null;
 
     @Unique
-    private boolean necessities$hasNecessitiesInstalled = false;
+    @Nullable
+    private Boolean necessities$hasNecessitiesInstalled = false;
 
     @Unique
     private boolean necessities$isAFK = false;
@@ -176,6 +167,10 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public boolean necessities$hasNecessitiesInstalled() {
+        if (necessities$hasNecessitiesInstalled == null) {
+            boolean installed = Knot.NETWORKING.canSendToPlayer((ServerPlayer) (Object) this, ClientboundPingPacket.TYPE);
+            this.necessities$setNecessitiesInstalled(installed);
+        }
         return necessities$hasNecessitiesInstalled;
     }
 
@@ -231,7 +226,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public void necessities$scheduleTeleport(Position position, int delaySeconds, String cooldownType, int cooldownSeconds, java.util.function.Consumer<NecessitiesServerPlayer> onComplete) {
         if (delaySeconds <= 0) {
             if (cooldownSeconds > 0) {
-                 this.necessities$setTeleportCooldown(cooldownType, cooldownSeconds);
+                this.necessities$setTeleportCooldown(cooldownType, cooldownSeconds);
             }
             this.necessities$teleport(position);
             if (onComplete != null) {
@@ -263,9 +258,9 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public void necessities$setTeleportCooldown(String type, int cooldownSeconds) {
-         if (cooldownSeconds > 0) {
+        if (cooldownSeconds > 0) {
             necessities$TeleportCooldowns.put(type, System.currentTimeMillis() + (cooldownSeconds * 1000L));
-         }
+        }
     }
 
     @Override
@@ -280,11 +275,11 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public int necessities$getHomeLimit() {
-        if (NecessitiesPermissions.check(this.createCommandSourceStack(), "necessities.home.limit.unlimited", 4)) {
+        if (Necessities.API.hasPermission(this.createCommandSourceStack(), "home.limit.unlimited")) {
             return -1;
         }
         for (int i = 50; i >= 1; i--) {
-            if (NecessitiesPermissions.check(this.createCommandSourceStack(), "necessities.home.limit." + i, 4)) {
+            if (Necessities.API.hasPermission(this.createCommandSourceStack(), "home.limit." + i)) {
                 return i;
             }
         }
@@ -293,11 +288,11 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
 
     @Override
     public int necessities$getMaxNickLength() {
-        if (NecessitiesPermissions.check(this.createCommandSourceStack(), "necessities.nick.length.unlimited", 4)) {
+        if (Necessities.API.hasPermission(this.createCommandSourceStack(), "nick.length.unlimited")) {
             return 256;
         }
         for (int i = 32; i >= 1; i--) {
-            if (NecessitiesPermissions.check(this.createCommandSourceStack(), "necessities.nick.length." + i, 4)) {
+            if (Necessities.API.hasPermission(this.createCommandSourceStack(), "nick.length." + i)) {
                 return i;
             }
         }
@@ -609,6 +604,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     public long necessities$getLastRTPTime() {
         return necessities$LastRTPTime;
     }
+
     @Override
     public void necessities$setLastRTPTime(long time) {
         necessities$LastRTPTime = time;

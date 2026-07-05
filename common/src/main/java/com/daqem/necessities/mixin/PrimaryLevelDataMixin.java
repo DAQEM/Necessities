@@ -3,16 +3,12 @@ package com.daqem.necessities.mixin;
 import com.daqem.necessities.level.storage.NecessitiesLevelData;
 import com.daqem.necessities.model.Position;
 import com.daqem.necessities.model.Warp;
-import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.OptionalDynamic;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.levelgen.WorldOptions;
-import net.minecraft.world.level.storage.LevelVersion;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
@@ -71,15 +67,15 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     }
 
     // Only fired when creating a new world.
-    @Inject(method = "<init>(Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/levelgen/WorldOptions;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lcom/mojang/serialization/Lifecycle;)V", at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/world/level/storage/PrimaryLevelData$SpecialWorldProperty;Lcom/mojang/serialization/Lifecycle;)V", at = @At("RETURN"))
     private void init(CallbackInfo ci) {
         necessities$spawnPosition = Position.ZERO;
         necessities$Warps = new HashMap<>();
     }
 
     @Inject(method = "parse", at = @At("RETURN"))
-    private static <T> void parse(Dynamic<T> dynamic, LevelSettings levelSettings, PrimaryLevelData.SpecialWorldProperty specialWorldProperty, WorldOptions worldOptions, Lifecycle lifecycle, CallbackInfoReturnable<PrimaryLevelData> cir) {
-        OptionalDynamic<T> necessities = dynamic.get("Necessities");
+    private static <T> void parse(Dynamic<T> input, LevelSettings settings, PrimaryLevelData.SpecialWorldProperty specialWorldProperty, Lifecycle worldGenSettingsLifecycle, CallbackInfoReturnable<PrimaryLevelData> cir) {
+        OptionalDynamic<T> necessities = input.get("Necessities");
 
         Position necessities$spawnPosition = Position.deserialize(necessities.get("Spawn").orElseEmptyMap());
 
@@ -97,7 +93,7 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
     }
 
     @Inject(method = "setTagData", at = @At("HEAD"))
-    private void setTagData(RegistryAccess registryAccess, CompoundTag compoundTag, CompoundTag compoundTag2, CallbackInfo ci) {
+    private void setTagData(CompoundTag tag, UUID singlePlayerUUID, CallbackInfo ci) {
         CompoundTag necessitiesTag = new CompoundTag();
 
         if (this.necessities$spawnPosition.equals(Position.ZERO)) {
@@ -108,6 +104,6 @@ public abstract class PrimaryLevelDataMixin implements ServerLevelData, WorldDat
         necessitiesTag.put("Warps", necessities$Warps.values().stream().map(Warp::serialize)
                 .collect(Collectors.toCollection(ListTag::new)));
 
-        compoundTag.put("Necessities", necessitiesTag);
+        tag.put("Necessities", necessitiesTag);
     }
 }

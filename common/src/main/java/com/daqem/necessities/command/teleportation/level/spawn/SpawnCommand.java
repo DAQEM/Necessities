@@ -1,7 +1,6 @@
 package com.daqem.necessities.command.teleportation.level.spawn;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
@@ -10,12 +9,13 @@ import com.daqem.necessities.model.Position;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.PermissionLevel;
 
 public class SpawnCommand implements Command {
 
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
          CommandManager.register(dispatcher, "spawn", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.spawn", 0))
+                .requires(source -> Necessities.API.hasPermission(source, "command.spawn", PermissionLevel.ALL))
                 .executes(context -> {
                     if (context.getSource().getPlayer() != null) {
                         if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {

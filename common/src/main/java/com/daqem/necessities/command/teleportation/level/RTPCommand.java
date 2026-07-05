@@ -3,7 +3,6 @@ package com.daqem.necessities.command.teleportation.level;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
@@ -17,6 +16,7 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
@@ -28,7 +28,7 @@ public class RTPCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
          CommandManager.register(dispatcher, "rtp", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.rtp", 0))
+                .requires(source -> Necessities.API.hasPermission(source, "command.rtp", PermissionLevel.ALL))
                 .executes(context -> rtp(context.getSource())));
     }
 
@@ -38,7 +38,7 @@ public class RTPCommand implements Command {
             return 0;
         }
 
-        if (!NecessitiesPermissions.check(source, "necessities.command.rtp.bypass_cooldown", 2)) {
+        if (!Necessities.API.hasPermission(source, "command.rtp.bypass_cooldown")) {
             long lastRTP = serverPlayer.necessities$getLastRTPTime();
             long currentTime = System.currentTimeMillis();
             long cooldown = NecessitiesConfig.rtpCooldown.get() * 1000L;
@@ -102,7 +102,7 @@ public class RTPCommand implements Command {
                 }
             });
         }).exceptionally(e -> {
-            Necessities.LOGGER.error("Error loading chunk for RTP command", e);
+            Necessities.API.error("Error loading chunk for RTP command", e);
             level.getServer().execute(() ->
                     attemptRtp(serverPlayer, level, minRadius, maxRadius, attemptsLeft - 1)
             );

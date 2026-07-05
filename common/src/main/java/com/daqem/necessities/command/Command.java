@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component;
 
 public interface Command {
 
-    Component NEEDS_PLAYER_ERROR = Necessities.translatable("commands.error.needs_player");
+    Component NEEDS_PLAYER_ERROR = Necessities.API.translatable("commands.error.needs_player");
 
     void register(CommandDispatcher<CommandSourceStack> dispatcher);
 }

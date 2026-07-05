@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.yamlconfig.YamlConfigExpectPlatform;
 import com.daqem.yamlconfig.api.config.ConfigExtension;
 import com.daqem.yamlconfig.api.config.ConfigType;
 import com.daqem.yamlconfig.api.config.IConfigBuilder;
 import com.daqem.yamlconfig.api.config.entry.IConfigEntry;
 import com.daqem.yamlconfig.impl.config.ConfigBuilder;
+import com.daqem.yamlconfig.platform.Services;
 
 public class CommandConfig {
 
@@ -22,7 +22,7 @@ public class CommandConfig {
                 "commands",
                 ConfigExtension.YAML,
                 ConfigType.COMMON,
-                YamlConfigExpectPlatform.getConfigDirectory().resolve(Necessities.MOD_ID)
+                Services.PLATFORM.getConfigDirectory().resolve(Necessities.MOD_ID)
         );
 
         // Register configs for known commands

@@ -1,7 +1,6 @@
 package com.daqem.necessities.command.chat;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -18,7 +17,7 @@ public class BroadcastCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
          CommandManager.register(dispatcher, "broadcast", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.broadcast", 2))
+                .requires(source -> Necessities.API.hasPermission(source, "command.broadcast"))
                 .then(Commands.argument("message", MessageArgument.message()).executes(commandContext -> {
                     MessageArgument.resolveChatMessage(commandContext, "message", playerChatMessage -> {
                         for (ServerPlayer player : commandContext.getSource().getServer().getPlayerList().getPlayers()) {

@@ -1,7 +1,6 @@
 package com.daqem.necessities.command.teleportation.level.warp;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -16,7 +15,7 @@ public class SetWarpCommand implements Command {
 
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         CommandManager.register(dispatcher, "setwarp", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.setwarp", 2))
+                .requires(source -> Necessities.API.hasPermission(source, "command.setwarp"))
                 .then(Commands.argument("name", StringArgumentType.string())
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPLayer) {

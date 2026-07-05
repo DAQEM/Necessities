@@ -1,7 +1,6 @@
 package com.daqem.necessities.command.chat;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.level.NecessitiesServerPlayer;
@@ -14,6 +13,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.server.players.PlayerList;
 
 public class ReplyCommand implements Command {
@@ -21,7 +21,7 @@ public class ReplyCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         CommandManager.register(dispatcher, "reply", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.reply", 0))
+                .requires(source -> Necessities.API.hasPermission(source, "command.reply", PermissionLevel.ALL))
                 .then(Commands.argument("message", MessageArgument.message())
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {

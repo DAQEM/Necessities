@@ -1,7 +1,6 @@
 package com.daqem.necessities.command.player;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
@@ -11,13 +10,14 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.permissions.PermissionLevel;
 
 public class NickCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         CommandManager.register(dispatcher, "nick", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.nick", 0))
+                .requires(source -> Necessities.API.hasPermission(source, "command.nick", PermissionLevel.ALL))
                 .then(Commands.argument("nickname", StringArgumentType.string())
                         .executes(context -> {
                             if (context.getSource().getPlayer() instanceof NecessitiesServerPlayer serverPlayer) {

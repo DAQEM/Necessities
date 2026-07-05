@@ -1,7 +1,6 @@
 package com.daqem.necessities.command.teleportation.player.tpa;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.config.NecessitiesConfig;
@@ -13,13 +12,14 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionLevel;
 
 public class TPAHereCommand implements Command {
 
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         CommandManager.register(dispatcher, "tpahere", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.tpahere", 0))
+                .requires(source -> Necessities.API.hasPermission(source, "command.tpahere", PermissionLevel.ALL))
                 .then(Commands.argument("player", StringArgumentType.string())
                         .suggests((context, builder) ->
                                 SharedSuggestionProvider.suggest(

@@ -15,7 +15,7 @@ public class ChunkMapTrackedEntityMixin {
 
     @Shadow
     @Final
-    Entity entity;
+    private Entity entity;
 
     @Inject(method = "updatePlayer", at = @At("HEAD"), cancellable = true)
     public void updatePlayer(ServerPlayer player, CallbackInfo ci) {

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.daqem.necessities.Necessities;
-import com.daqem.necessities.NecessitiesPermissions;
 import com.daqem.necessities.command.Command;
 import com.daqem.necessities.command.CommandManager;
 import com.daqem.necessities.data.KitManager;
@@ -27,6 +26,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.item.ItemStack;
 
 public class KitCommand implements Command {
@@ -42,7 +42,7 @@ public class KitCommand implements Command {
     @Override
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         CommandManager.register(dispatcher, "kit", literal -> literal
-                .requires(source -> NecessitiesPermissions.check(source, "necessities.command.kit", 0))
+                .requires(source -> Necessities.API.hasPermission(source, "command.kit", PermissionLevel.ALL))
                 .then(Commands.argument("kit", StringArgumentType.string())
                         .suggests(SUGGEST_KITS)
                         .executes(context -> giveKit(context, StringArgumentType.getString(context, "kit"))))
@@ -90,7 +90,7 @@ public class KitCommand implements Command {
             long now = System.currentTimeMillis();
             long remainingMillis = cooldownMillis - (now - lastUsed);
 
-            if (remainingMillis > 0 && !NecessitiesPermissions.check(context.getSource(), "necessities.command.kit.bypass_cooldown", 2)) {
+            if (remainingMillis > 0 && !Necessities.API.hasPermission(context.getSource(), "command.kit.bypass_cooldown")) {
                 String timeString = getDurationBreakdown(remainingMillis);
                 serverPlayer.necessities$sendFailedSystemMessage(Necessities.prefixedFailureTranslatable("commands.kit.cooldown", Necessities.coloredFailure(timeString)));
                 return 0;
@@ -121,7 +121,7 @@ public class KitCommand implements Command {
 
     public static String getDurationBreakdown(long millis) {
         if (millis <= 0) {
-            return "0 " + Necessities.translatable("time.seconds").getString();
+            return "0 " + Necessities.API.translatable("time.seconds").getString();
         }
         long seconds = millis / 1000;
         final long ONE_MINUTE = 60;
@@ -148,9 +148,9 @@ public class KitCommand implements Command {
 
         List<String> parts = new ArrayList<>();
         for (Map.Entry<String, Long> entry : units.entrySet()) {
-            parts.add(entry.getValue() + " " + Necessities.translatable(entry.getKey()).getString());
+            parts.add(entry.getValue() + " " + Necessities.API.translatable(entry.getKey()).getString());
         }
-        if (parts.isEmpty()) return "0 " + Necessities.translatable("time.seconds").getString();
+        if (parts.isEmpty()) return "0 " + Necessities.API.translatable("time.seconds").getString();
         return String.join(", ", parts);
     }
 }

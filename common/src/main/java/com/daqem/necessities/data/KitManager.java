@@ -2,7 +2,7 @@ package com.daqem.necessities.data;
 
 import com.daqem.necessities.Necessities;
 import com.daqem.necessities.model.Kit;
-import com.daqem.yamlconfig.YamlConfigExpectPlatform;
+import com.daqem.yamlconfig.platform.Services;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -56,12 +56,12 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
                 JsonObject jsonElement = GsonHelper.parse(entry.getValue().openAsReader());
                 map.put(location, jsonElement);
             } catch (Exception runtimeException) {
-                Necessities.LOGGER.error("Parsing error loading kit {}", location, runtimeException);
+                Necessities.API.error("Parsing error loading kit {}", location, runtimeException);
             }
         }
 
         try {
-            Path configDir = YamlConfigExpectPlatform.getConfigDirectory().resolve(Necessities.MOD_ID).resolve("kits");
+            Path configDir = Services.PLATFORM.getConfigDirectory().resolve(Necessities.MOD_ID).resolve("kits");
             if (!Files.exists(configDir)) {
                 Files.createDirectories(configDir);
             }
@@ -87,12 +87,12 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
                                 // Config files override datapack files with the same ID
                                 map.put(location, jsonElement);
                             } catch (Exception e) {
-                                Necessities.LOGGER.error("Parsing error loading kit from config {}", path, e);
+                                Necessities.API.error("Parsing error loading kit from config {}", path, e);
                             }
                         });
             }
         } catch (Exception e) {
-            Necessities.LOGGER.error("Error loading kits from config", e);
+            Necessities.API.error("Error loading kits from config", e);
         }
 
         // 3. Parse gathered JSON objects
@@ -110,7 +110,7 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
                 // Assign the ID from the file location
                 kits.add(kitData.withId(location));
             } catch (Exception e) {
-                Necessities.LOGGER.error("Parsing error loading kit {}", location, e);
+                Necessities.API.error("Parsing error loading kit {}", location, e);
             }
         }
 
@@ -119,7 +119,7 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
 
     @Override
     protected void apply(List<Kit> object, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        Necessities.LOGGER.info("Loaded {} kits", object.size());
+        Necessities.API.info("Loaded {} kits", object.size());
         this.kits = object.stream()
                 .collect(ImmutableMap.toImmutableMap(
                         Kit::getId,
