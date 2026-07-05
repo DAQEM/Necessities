@@ -1,7 +1,6 @@
 package com.daqem.necessities.neoforge;
 
 import com.daqem.necessities.Necessities;
-import dev.architectury.utils.EnvExecutor;
 import net.neoforged.fml.common.Mod;
 
 @Mod(Necessities.MOD_ID)
