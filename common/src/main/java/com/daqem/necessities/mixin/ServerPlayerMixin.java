@@ -38,6 +38,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -63,7 +64,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Shadow
-    public abstract void sendSystemMessage(Component arg, boolean bl);
+    public abstract void sendSystemMessage(Component message, boolean overlay);
 
     @Shadow
     private boolean disconnected;
@@ -72,10 +73,10 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     protected abstract boolean acceptsChatMessages();
 
     @Shadow
-    public abstract boolean teleportTo(ServerLevel arg, double d, double e, double f, Set<Relative> set, float g, float h, boolean bl);
+    public abstract boolean teleportTo(@NonNull ServerLevel level, double x, double y, double z, @NonNull Set<Relative> relatives, float newYRot, float newXRot, boolean resetCamera);
 
     @Shadow
-    public abstract ServerLevel level();
+    public abstract @NonNull ServerLevel level();
 
     @Shadow
     public abstract CommandSourceStack createCommandSourceStack();
@@ -643,7 +644,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Inject(at = @At("TAIL"), method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V")
-    public void restoreFrom(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
+    public void restoreFrom(ServerPlayer oldPlayer, boolean restoreAll, CallbackInfo ci) {
         if (oldPlayer instanceof NecessitiesServerPlayer oldNecessitiesServerPlayer) {
             this.necessities$Homes = oldNecessitiesServerPlayer.necessities$getHomes().stream()
                     .collect(Collectors.toMap(home -> home.name, home -> home));
@@ -659,8 +660,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Inject(at = @At("TAIL"), method = "addAdditionalSaveData")
-    public void addAdditionalSaveData(ValueOutput valueOutput, CallbackInfo ci) {
-        valueOutput.store("Necessities", ServerPlayerData.CODEC, new ServerPlayerData(
+    public void addAdditionalSaveData(ValueOutput output, CallbackInfo ci) {
+        output.store("Necessities", ServerPlayerData.CODEC, new ServerPlayerData(
                 this.necessities$getHomes(),
                 this.necessities$getLastPosition(),
                 this.necessities$acceptsTPARequests(),
@@ -674,8 +675,8 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Inject(at = @At("TAIL"), method = "readAdditionalSaveData")
-    public void readAdditionalSaveData(ValueInput valueInput, CallbackInfo ci) {
-        valueInput.read("Necessities", ServerPlayerData.CODEC).ifPresent(data -> {
+    public void readAdditionalSaveData(ValueInput input, CallbackInfo ci) {
+        input.read("Necessities", ServerPlayerData.CODEC).ifPresent(data -> {
             this.necessities$Homes = data.homes().stream()
                     .collect(Collectors.toMap(home -> home.name, home -> home));
             this.necessities$LastPosition = data.lastPosition();
@@ -699,13 +700,13 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Inject(at = @At("HEAD"), method = "sendChatMessage(Lnet/minecraft/network/chat/OutgoingChatMessage;ZLnet/minecraft/network/chat/ChatType$Bound;)V")
-    public void sendChatMessage(OutgoingChatMessage message, boolean bl, ChatType.Bound bound, CallbackInfo ci) {
-        if (necessities$isAFK() && necessities$sendsMessageThemself(bound.chatType())) {
+    public void sendChatMessage(OutgoingChatMessage message, boolean filtered, ChatType.Bound chatType, CallbackInfo ci) {
+        if (necessities$isAFK() && necessities$sendsMessageThemself(chatType.chatType())) {
             necessities$setAFK(false);
         }
 
         if (this.acceptsChatMessages()) {
-            if (bound.chatType().is(ChatType.MSG_COMMAND_INCOMING) || bound.chatType().is(ChatType.TEAM_MSG_COMMAND_INCOMING)) {
+            if (chatType.chatType().is(ChatType.MSG_COMMAND_INCOMING) || chatType.chatType().is(ChatType.TEAM_MSG_COMMAND_INCOMING)) {
                 if (message instanceof OutgoingChatMessage.Player(
                         PlayerChatMessage playerMessage
                 )) {
@@ -725,7 +726,7 @@ public abstract class ServerPlayerMixin extends Player implements NecessitiesSer
     }
 
     @Inject(at = @At("HEAD"), method = "isInvulnerableTo", cancellable = true)
-    public void isInvulnerableTo(ServerLevel serverLevel, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
+    public void isInvulnerableTo(ServerLevel level, DamageSource source, CallbackInfoReturnable<Boolean> cir) {
         if (necessities$hasGodMode()) {
             cir.setReturnValue(true);
         }

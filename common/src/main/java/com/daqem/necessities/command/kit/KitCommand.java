@@ -34,7 +34,7 @@ public class KitCommand implements Command {
     private static final SuggestionProvider<CommandSourceStack> SUGGEST_KITS = (context, builder) -> {
         Set<String> suggestions = new HashSet<>();
         for (Kit kit : KitManager.getInstance().getKits()) {
-            suggestions.add(kit.getId().getPath());
+            suggestions.add(kit.id().getPath());
         }
         return SharedSuggestionProvider.suggest(suggestions, builder);
     };
@@ -58,7 +58,7 @@ public class KitCommand implements Command {
 
         Set<String> kitsSet = new HashSet<>();
         for (Kit kit : KitManager.getInstance().getKits()) {
-            kitsSet.add(kit.getId().getPath());
+            kitsSet.add(kit.id().getPath());
         }
 
         MutableComponent message = Necessities.prefixedTranslatable("commands.kits.list");
@@ -84,8 +84,8 @@ public class KitCommand implements Command {
                 return 0;
             }
 
-            Identifier kitId = kit.getId();
-            long cooldownMillis = kit.getCooldown() * 1000L;
+            Identifier kitId = kit.id();
+            long cooldownMillis = kit.cooldown() * 1000L;
             long lastUsed = serverPlayer.necessities$getKitCooldown(kitId);
             long now = System.currentTimeMillis();
             long remainingMillis = cooldownMillis - (now - lastUsed);
@@ -96,7 +96,7 @@ public class KitCommand implements Command {
                 return 0;
             }
 
-            for (ItemStack stack : kit.getItems()) {
+            for (ItemStack stack : kit.createItems()) {
                 if (!player.getInventory().add(stack.copy())) {
                     player.drop(stack.copy(), false);
                 }
@@ -111,7 +111,7 @@ public class KitCommand implements Command {
 
     private Kit findKit(String input) {
         for (Kit kit : KitManager.getInstance().getKits()) {
-            if (kit.getId().getPath().equals(input)) {
+            if (kit.id().getPath().equals(input)) {
                 return kit;
             }
         }

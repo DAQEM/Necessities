@@ -14,6 +14,7 @@ import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.BufferedReader;
 import java.nio.file.Files;
@@ -37,7 +38,7 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
     }
 
     @Override
-    protected @NotNull List<Kit> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected @NotNull List<Kit> prepare(ResourceManager resourceManager, @NonNull ProfilerFiller profilerFiller) {
         // 1. Load from Datapacks
         Map<Identifier, Resource> resourceMap = resourceManager.listResources("necessities/kits", (resourceLocation) ->
                         resourceLocation.getPath().endsWith(".json")).entrySet().stream()
@@ -118,11 +119,11 @@ public class KitManager extends SimplePreparableReloadListener<List<Kit>> {
     }
 
     @Override
-    protected void apply(List<Kit> object, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(List<Kit> object, @NonNull ResourceManager resourceManager, @NonNull ProfilerFiller profilerFiller) {
         Necessities.API.info("Loaded {} kits", object.size());
         this.kits = object.stream()
                 .collect(ImmutableMap.toImmutableMap(
-                        Kit::getId,
+                        Kit::id,
                         kit -> kit
                 ));
     }

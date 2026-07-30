@@ -53,16 +53,16 @@ public class PlayerListMixin {
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"))
-    public void redirectBroadcastSystemMessage(PlayerList instance, Component component, boolean bl, Connection connection, ServerPlayer player, CommonListenerCookie cookie) {
+    public void redirectBroadcastSystemMessage(PlayerList instance, Component message, boolean overlay, Connection connection, ServerPlayer player, CommonListenerCookie cookie) {
         if (player instanceof NecessitiesServerPlayer serverPlayer && serverPlayer.necessities$isVanished()) {
             for (ServerPlayer p : instance.getPlayers()) {
                 if (p.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) {
-                    p.sendSystemMessage(component);
+                    p.sendSystemMessage(message);
                 }
             }
             return;
         }
-        instance.broadcastSystemMessage(component, bl);
+        instance.broadcastSystemMessage(message, overlay);
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"))
